@@ -10,24 +10,29 @@ export default function PitMapView() {
 
   useEffect(() => {
     const vtUrl = import.meta.env.VITE_VT_LAYER_URL;
-    esriConfig.apiKey = import.meta.env.VITE_ARCGIS_API_KEY;
 
+    // ---- No basemap ----
+    const map = new Map({
+      basemap: null,
+      layers: []
+    });
+
+    // Add your vector tile layer
     const vtLayer = new VectorTileLayer({
       url: vtUrl,
-      opacity: 1
+      id: "coc-boundaries"
     });
 
-    const map = new Map({
-      basemap: "gray-vector"
-    });
-
-    map.layers.add(vtLayer); 
+    map.add(vtLayer);
 
     const view = new MapView({
       container: mapDiv.current,
       map,
       center: [-98, 39],
       zoom: 4,
+      constraints: {
+        snapToZoom: false
+      }
     });
 
     return () => view.destroy();
