@@ -4,9 +4,11 @@ import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 
-export default function PitMapView() {
+export default function MapViewComponent({ selectedState }) {
   const mapDiv = useRef(null);
+  const layerRef = useRef(null);
 
+  // ---- INITIALIZE MAP & LAYER ----
   useEffect(() => {
     const map = new Map({
       basemap: "gray-vector"
@@ -17,6 +19,9 @@ export default function PitMapView() {
       id: "coc-boundaries",
       outFields: ["*"]
     });
+
+    // store the layer for filtering later
+    layerRef.current = cocLayer;
 
     map.add(cocLayer);
 
@@ -29,6 +34,18 @@ export default function PitMapView() {
 
     return () => view.destroy();
   }, []);
+
+  // ---- APPLY FILTER WHEN selectedState CHANGES ----
+  useEffect(() => {
+    const layer = layerRef.current;
+    if (!layer) return;
+
+    if (!selectedState || selectedState === "") {
+      layer.definitionExpression = null; // reset
+    } else {
+      layer.definitionExpression = `STATE_NAME = '${selectedState}'`;
+    }
+  }, [selectedState]);
 
   return <div ref={mapDiv} style={{ height: "100%", width: "100%" }} />;
 }

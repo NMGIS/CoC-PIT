@@ -1,15 +1,23 @@
-import { useEffect } from "react";
-import PitMapView from "./components/MapView";
+import { useState } from "react";
+import MapViewComponent from "./components/MapView";
 import Layout from "./components/Layout";
-import { supabase } from "./supabaseClient";
+import StateFilter from "./components/Filters.jsx";
 
 export default function App() {
+  const [selectedState, setSelectedState] = useState("");
 
   return (
     <Layout
-      top={<div style={{ color: "white" }}>Filters go here</div>}
+      top={
+        <>
+          <StateFilter 
+            value={selectedState}
+            onChange={setSelectedState}
+          />
+        </>
+      }
       left={<div style={{ color: "white" }}>Charts + Big Numbers</div>}
-      map={<PitMapView />}
+      map={<MapViewComponent selectedState={selectedState} />}
     />
   );
 }
