@@ -7,6 +7,7 @@ import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 export default function MapViewComponent({ selectedState }) {
   const mapDiv = useRef(null);
   const layerRef = useRef(null);
+  const viewRef = useRef(null);
 
   // ---- INITIALIZE MAP & LAYER ----
   useEffect(() => {
@@ -20,9 +21,7 @@ export default function MapViewComponent({ selectedState }) {
       outFields: ["*"]
     });
 
-    // store the layer for filtering later
     layerRef.current = cocLayer;
-
     map.add(cocLayer);
 
     const view = new MapView({
@@ -32,19 +31,40 @@ export default function MapViewComponent({ selectedState }) {
       zoom: 4
     });
 
+    viewRef.current = view;
+
     return () => view.destroy();
   }, []);
 
-  // ---- APPLY FILTER WHEN selectedState CHANGES ----
+  // ---- APPLY FILTER + ZOOM WHEN selectedState CHANGES ----
   useEffect(() => {
     const layer = layerRef.current;
-    if (!layer) return;
+    const view = viewRef.current;
+    if (!layer || !view) return;
 
     if (!selectedState || selectedState === "") {
-      layer.definitionExpression = null; // reset
-    } else {
-      layer.definitionExpression = `STATE_NAME = '${selectedState}'`;
+      layer.definitionExpression = null;
+
+      // Reset to nationwide view
+      view.goTo({
+        center: [-98, 39],
+        zoom: 4
+      });
+
+      return;
     }
+
+    layer.definitionExpression = `STATE_NAME = '${selectedState}'`;
+
+    // Zoom to filtered features
+    layer
+      .queryExtent()
+      .then((result) => {
+        if (result.extent) {
+          view.goTo(result.extent.expand(1.2));
+        }
+      })
+      .catch((err) => console.error(err));
   }, [selectedState]);
 
   return <div ref={mapDiv} style={{ height: "100%", width: "100%" }} />;
