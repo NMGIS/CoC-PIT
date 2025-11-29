@@ -13,10 +13,9 @@ export default function StateFilter({ value, onChange }) {
   ];
 
   return (
-    <select
+    <select className="dropdown"
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      style={{ padding: "6px", fontSize: "15px" }}
     >
       <option value="">All States</option>
       {states.map((st) => (

@@ -2,6 +2,7 @@ import { useState } from "react";
 import MapViewComponent from "./components/MapView";
 import Layout from "./components/Layout";
 import StateFilter from "./components/Filters";
+import "./App.css";
 
 export default function App() {
   // ---- FILTER STATES ----

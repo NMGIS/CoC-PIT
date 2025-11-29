@@ -40,3 +40,14 @@
 .read-the-docs {
   color: #888;
 }
+
+.dropdown {
+  width: 150px;  
+  height: 34.8px;       
+  padding: 6px 10px;
+  font-size: 15px;
+  background: #444444;
+  color: #ffffff;
+  border: 1px solid #666;
+  border-radius: 4px;
+}
