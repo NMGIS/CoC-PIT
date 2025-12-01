@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
+import { supabase } from "../supabaseClient";
 
 export default function MapViewComponent({ selectedState }) {
   const mapDiv = useRef(null);
@@ -10,7 +11,7 @@ export default function MapViewComponent({ selectedState }) {
   const viewRef = useRef(null);
 
   // ---- INITIALIZE MAP & LAYER ----
-  useEffect(() => {
+  useEffect(() => {    
     const map = new Map({
       basemap: "gray-vector"
     });
@@ -34,6 +35,22 @@ export default function MapViewComponent({ selectedState }) {
     viewRef.current = view;
 
     return () => view.destroy();
+  }, []);
+
+  // test connection
+
+    useEffect(() => {
+    const testSupabase = async () => {
+      const { data, error } = await supabase
+        .from("sheltered_sh_homeless") 
+        .select("*")
+        .limit(5);
+
+      console.log("Supabase test data:", data);
+      if (error) console.error("Supabase error:", error);
+    };
+
+    testSupabase();
   }, []);
 
   // ---- APPLY FILTER + ZOOM WHEN selectedState CHANGES ----
@@ -68,4 +85,5 @@ export default function MapViewComponent({ selectedState }) {
   }, [selectedState]);
 
   return <div ref={mapDiv} style={{ height: "100%", width: "100%" }} />;
+  
 }
