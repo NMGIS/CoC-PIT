@@ -1,7 +1,7 @@
 import { useState } from "react";
 import MapViewComponent from "./components/MapView";
 import Layout from "./components/Layout";
-import StateFilter from "./components/Filters";
+import StateFilter from "./components/StateFilter";
 import "./App.css";
 
 export default function App() {
