@@ -5,7 +5,24 @@ import MapView from "@arcgis/core/views/MapView";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import { supabase } from "../supabaseClient";
 
-export default function MapViewComponent({ selectedState }) {
+function buildDefinitionExpression(state, cocnums) {
+  let parts = [];
+
+  if (state && state !== "") {
+    parts.push(`STATE_NAME = '${state}'`);
+  }
+
+  if (cocnums && cocnums.length > 0) {
+    const list = cocnums.map(c => `'${c}'`).join(",");
+    parts.push(`COCNUM IN (${list})`);
+  }
+
+  if (parts.length === 0) return null;     // remove filter
+  return parts.join(" AND ");              // combine filters cleanly
+}
+
+
+export default function MapViewComponent({ selectedState, selectedCocnums = [] }) {
   const mapDiv = useRef(null);
   const layerRef = useRef(null);
   const viewRef = useRef(null);
@@ -55,34 +72,32 @@ export default function MapViewComponent({ selectedState }) {
 
   // ---- APPLY FILTER + ZOOM WHEN selectedState CHANGES ----
   useEffect(() => {
-    const layer = layerRef.current;
-    const view = viewRef.current;
-    if (!layer || !view) return;
+  const layer = layerRef.current;
+  const view = viewRef.current;
+  if (!layer || !view) return;
 
-    if (!selectedState || selectedState === "") {
-      layer.definitionExpression = null;
+  const expr = buildDefinitionExpression(selectedState, selectedCocnums);
 
-      // Reset to nationwide view
-      view.goTo({
-        center: [-98, 39],
-        zoom: 4
-      });
+  layer.definitionExpression = expr;
 
-      return;
-    }
+  // If nothing selected → reset view
+  if (!expr) {
+    view.goTo({ center: [-98, 39], zoom: 4 });
+    return;
+  }
 
-    layer.definitionExpression = `STATE_NAME = '${selectedState}'`;
+  // Zoom to filtered features
+  layer
+    .queryExtent()
+    .then((result) => {
+      if (result.extent) {
+        view.goTo(result.extent.expand(1.2));
+      }
+    })
+    .catch((err) => console.error(err));
 
-    // Zoom to filtered features
-    layer
-      .queryExtent()
-      .then((result) => {
-        if (result.extent) {
-          view.goTo(result.extent.expand(1.2));
-        }
-      })
-      .catch((err) => console.error(err));
-  }, [selectedState]);
+}, [selectedState, selectedCocnums]);
+
 
   return <div ref={mapDiv} style={{ height: "100%", width: "100%" }} />;
   
