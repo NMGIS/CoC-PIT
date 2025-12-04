@@ -48,6 +48,7 @@ export default function App() {
   // ---- RESET ALL FILTERS ----
   const handleReset = () => {
     setSelectedState("");
+    setSelectedCocnums([]);   
   };
 
   return (
