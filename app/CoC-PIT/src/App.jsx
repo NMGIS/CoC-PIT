@@ -44,12 +44,92 @@ export default function App() {
     "WI-500", "WI-501", "WI-502", "WI-503", "WV-500", "WV-501", "WV-503", "WV-508",
     "WY-500"
   ];
+  const stateToPrefix = {
+    "Alabama": "AL",
+    "Alaska": "AK",
+    "American Samoa": "AS",
+    "Arizona": "AZ",
+    "Arkansas": "AR",
+    "California": "CA",
+    "Colorado": "CO",
+    "Connecticut": "CT",
+    "Delaware": "DE",
+    "District of Columbia": "DC",
+    "Florida": "FL",
+    "Georgia": "GA",
+    "Guam": "GU",
+    "Hawaii": "HI",
+    "Idaho": "ID",
+    "Illinois": "IL",
+    "Indiana": "IN",
+    "Iowa": "IA",
+    "Kansas": "KS",
+    "Kentucky": "KY",
+    "Louisiana": "LA",
+    "Maine": "ME",
+    "Maryland": "MD",
+    "Massachusetts": "MA",   // special handling below
+    "Michigan": "MI",
+    "Minnesota": "MN",
+    "Mississippi": "MS",
+    "Missouri": "MO",
+    "Montana": "MT",
+    "Nebraska": "NE",
+    "Nevada": "NV",
+    "New Hampshire": "NH",
+    "New Jersey": "NJ",
+    "New Mexico": "NM",
+    "New York": "NY",
+    "North Carolina": "NC",
+    "North Dakota": "ND",
+    "Northern Marianas": "MP",
+    "Ohio": "OH",
+    "Oklahoma": "OK",
+    "Oregon": "OR",
+    "Pennsylvania": "PA",
+    "Puerto Rico": "PR",
+    "Rhode Island": "RI",
+    "South Carolina": "SC",
+    "South Dakota": "SD",
+    "Tennessee": "TN",
+    "Texas": "TX",
+    "Utah": "UT",
+    "Vermont": "VT",
+    "Virgin Islands": "VI",
+    "Virginia": "VA",
+    "Washington": "WA",
+    "West Virginia": "WV",
+    "Wisconsin": "WI",
+    "Wyoming": "WY"
+  };
+
+  const filteredCocList = selectedState
+    ? cocList.filter(c => {
+      const prefix = stateToPrefix[selectedState];
+
+      // --- SPECIAL CASE: MASSACHUSETTS ---
+      // Any COCNUM beginning with "MA" should be included
+      if (prefix === "MA") return c.startsWith("MA");
+
+      // --- NORMAL STATES ---
+      return c.startsWith(prefix + "-");
+    })
+    : cocList;
+
 
   // ---- RESET ALL FILTERS ----
   const handleReset = () => {
     setSelectedState("");
-    setSelectedCocnums([]);   
+    setSelectedCocnums([]);
   };
+
+  // ---- HANDLE STATE CHANGE + AUTO-SELECT COCNUMS ----
+  const handleStateChange = (state) => {
+    setSelectedState(state);
+    setSelectedCocnums([]);
+  };
+
+
 
   return (
     <Layout
@@ -71,13 +151,18 @@ export default function App() {
           </button>
 
           {/* STATE FILTER */}
-          <StateFilter value={selectedState} onChange={setSelectedState} />
+          <StateFilter
+            value={selectedState}
+            onChange={(state) => handleStateChange(state)}
+          />
 
           <CocnumFilter
             value={selectedCocnums}
             onChange={setSelectedCocnums}
-            cocnums={cocList}
+            cocnums={filteredCocList}
           />
+
+
         </div>
       }
       left={<div style={{ color: "white" }}>Charts + Big Numbers</div>}
