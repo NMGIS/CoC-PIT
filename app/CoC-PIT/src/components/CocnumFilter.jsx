@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import "../App.css"; 
+import "../App.css";
 
 export default function CocnumFilter({ value = [], onChange, cocnums = [] }) {
   const [open, setOpen] = useState(false);
@@ -29,12 +29,18 @@ export default function CocnumFilter({ value = [], onChange, cocnums = [] }) {
       {/* BUTTON */}
       <button
         className="dropdown"
-        style={{ width: "180px", textAlign: "left", cursor: "pointer" }}
-        onClick={() => setOpen((prev) => !(prev))}
+        style={{
+          width: "180px",
+          cursor: "pointer",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          textAlign: "left",
+        }}
+        onClick={() => setOpen((prev) => !prev)}
       >
-        {value.length === 0
-          ? "All COCNUMs"
-          : `${value.length} selected`}
+        {value.length === 0 ? "COCNUM" : `${value.length} selected`}
+        <span style={{ fontSize: "16px", opacity: 0.8 }}>˅</span>
       </button>
 
       {/* DROPDOWN PANEL */}
