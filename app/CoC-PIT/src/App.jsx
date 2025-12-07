@@ -201,18 +201,19 @@ export default function App() {
     "Wyoming": "WY"
   };
 
+
+  const combinedList = [...cocList, ...legacyList].sort();
+
   const filteredCocList = selectedState
-    ? cocList.filter(c => {
+    ? combinedList.filter(c => {
       const prefix = stateToPrefix[selectedState];
 
-      // --- SPECIAL CASE: MASSACHUSETTS ---
-      // Any COCNUM beginning with "MA" should be included
+      // MASSACHUSETTS special case
       if (prefix === "MA") return c.startsWith("MA");
 
-      // --- NORMAL STATES ---
       return c.startsWith(prefix + "-");
     })
-    : cocList;
+    : combinedList;
 
 
   // ---- RESET ALL FILTERS ----
