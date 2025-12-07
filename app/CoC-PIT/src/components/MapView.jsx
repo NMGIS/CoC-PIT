@@ -21,15 +21,28 @@ function buildDefinitionExpression(state, cocnums) {
   return parts.join(" AND ");
 }
 
-export default function MapViewComponent({ selectedState, selectedCocnums = [] }) {
+export default function MapViewComponent({ selectedState, selectedCurrent = [], selectedLegacy = [] }) {
   const mapDiv = useRef(null);
   const layerRef = useRef(null);
   const viewRef = useRef(null);
   const legacyLayerRef = useRef(null);
-
-
   const [isLoading, setIsLoading] = useState(true);
   const layerViewRef = useRef(null);
+
+  function buildCurrentExpr(state, cocnums) {
+    let parts = [];
+    if (state) parts.push(`STATE_NAME = '${state}'`);
+    if (cocnums.length > 0) parts.push(`COCNUM IN (${cocnums.map(c => `'${c}'`).join(",")})`);
+    return parts.length ? parts.join(" AND ") : null;
+  }
+
+  function buildLegacyExpr(state, cocnums) {
+    let parts = [];
+    if (state) parts.push(`STATE_NAME = '${state}'`);
+    if (cocnums.length > 0) parts.push(`COCNUM IN (${cocnums.map(c => `'${c}'`).join(",")})`);
+    return parts.length ? parts.join(" AND ") : null;
+  }
+
 
   // ---- INITIALIZE MAP & LAYER ----
   useEffect(() => {
@@ -148,31 +161,38 @@ export default function MapViewComponent({ selectedState, selectedCocnums = [] }
 
   // ---- APPLY FILTERS + ZOOM ----
   useEffect(() => {
-    const layer = layerRef.current;
+    const currentLayer = layerRef.current;
+    const legacyLayer = legacyLayerRef.current;
     const view = viewRef.current;
-    if (!layer || !view) return;
 
-    const expr = buildDefinitionExpression(selectedState, selectedCocnums);
+    if (!currentLayer || !legacyLayer || !view) return;
 
-    // Debounce filtering for smoother UX
-    const handle = setTimeout(() => {
-      layer.definitionExpression = expr;
+    const currExpr = buildCurrentExpr(selectedState, selectedCurrent);
+    const legExpr = buildLegacyExpr(selectedState, selectedLegacy);
 
-      if (!expr) {
-        view.goTo({ center: [-98, 39], zoom: 4 });
-        return;
-      }
+    currentLayer.definitionExpression = currExpr;
+    legacyLayer.definitionExpression = legExpr;
 
-      // Query extent of filtered features
-      layer.queryExtent().then((result) => {
-        if (result.extent) {
-          view.goTo(result.extent.expand(1.2));
-        }
-      });
-    }, 250);
+    // ZOOM — use the layer with the most restrictive filter
+    const zoomLayer = selectedCurrent.length > 0
+      ? currentLayer
+      : selectedLegacy.length > 0
+        ? legacyLayer
+        : currentLayer;
 
-    return () => clearTimeout(handle);
-  }, [selectedState, selectedCocnums]);
+    const expr = zoomLayer.definitionExpression;
+
+    if (!expr) {
+      view.goTo({ center: [-98, 39], zoom: 4 });
+      return;
+    }
+
+    zoomLayer.queryExtent().then((result) => {
+      if (result.extent) view.goTo(result.extent.expand(1.2));
+    });
+
+  }, [selectedState, selectedCurrent, selectedLegacy]);
+
 
   // ---- RENDER MAP + LOADING INDICATOR ----
   return (

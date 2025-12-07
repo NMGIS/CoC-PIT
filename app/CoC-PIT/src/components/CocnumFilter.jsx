@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import "../App.css";
 
-export default function CocnumFilter({ value = [], onChange, cocnums = [] }) {
+export default function CocnumFilter({ label = "COCNUM", value = [], onChange, cocnums = [] }) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -39,7 +39,7 @@ export default function CocnumFilter({ value = [], onChange, cocnums = [] }) {
         }}
         onClick={() => setOpen((prev) => !prev)}
       >
-        {value.length === 0 ? "COCNUM" : `${value.length} selected`}
+        {value.length === 0 ? label : `${value.length} selected`}
         <span style={{ fontSize: "16px", opacity: 0.8 }}>˅</span>
       </button>
 

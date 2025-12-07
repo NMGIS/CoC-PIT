@@ -8,7 +8,6 @@ import "./App.css";
 export default function App() {
   // ---- FILTER STATES ----
   const [selectedState, setSelectedState] = useState("");
-  const [selectedCocnums, setSelectedCocnums] = useState([]);
   const cocList = [
     "AK-500", "AK-501",
     "AL-500", "AL-501", "AL-502", "AL-503", "AL-504", "AL-505", "AL-506", "AL-507", "AL-508",
@@ -201,31 +200,38 @@ export default function App() {
     "Wyoming": "WY"
   };
 
+  // ---- FILTER STATES ---
 
-  const combinedList = [...cocList, ...legacyList].sort();
+  const [selectedCurrentCocnums, setSelectedCurrentCocnums] = useState([]);
+  const [selectedLegacyCocnums, setSelectedLegacyCocnums] = useState([]);
 
-  const filteredCocList = selectedState
-    ? combinedList.filter(c => {
+  const filteredCurrentList = selectedState
+    ? cocList.filter(c => {
       const prefix = stateToPrefix[selectedState];
-
-      // MASSACHUSETTS special case
       if (prefix === "MA") return c.startsWith("MA");
-
       return c.startsWith(prefix + "-");
     })
-    : combinedList;
+    : cocList;
 
+  const filteredLegacyList = selectedState
+    ? legacyList.filter(c => {
+      const prefix = stateToPrefix[selectedState];
+      if (prefix === "MA") return c.startsWith("MA");
+      return c.startsWith(prefix + "-");
+    })
+    : legacyList;
 
   // ---- RESET ALL FILTERS ----
   const handleReset = () => {
     setSelectedState("");
-    setSelectedCocnums([]);
+    setSelectedCurrentCocnums([]);
+    setSelectedLegacyCocnums([]);
   };
 
-  // ---- HANDLE STATE CHANGE + AUTO-SELECT COCNUMS ----
   const handleStateChange = (state) => {
     setSelectedState(state);
-    setSelectedCocnums([]);
+    setSelectedCurrentCocnums([]);
+    setSelectedLegacyCocnums([]);
   };
 
 
@@ -255,10 +261,18 @@ export default function App() {
             onChange={(state) => handleStateChange(state)}
           />
 
+          {/* CURRENT COCNUMS */}
           <CocnumFilter
-            value={selectedCocnums}
-            onChange={setSelectedCocnums}
-            cocnums={filteredCocList}
+            value={selectedCurrentCocnums}
+            onChange={setSelectedCurrentCocnums}
+            cocnums={filteredCurrentList}
+          />
+
+          <CocnumFilter
+            label="Legacy COCNUM"
+            value={selectedLegacyCocnums}
+            onChange={setSelectedLegacyCocnums}
+            cocnums={filteredLegacyList}
           />
 
 
@@ -267,8 +281,10 @@ export default function App() {
       left={<div style={{ color: "white" }}>Charts + Big Numbers</div>}
       map={<MapViewComponent
         selectedState={selectedState}
-        selectedCocnums={selectedCocnums}
-      />}
+        selectedCurrent={selectedCurrentCocnums}
+        selectedLegacy={selectedLegacyCocnums}
+      />
+      }
     />
   );
 }
