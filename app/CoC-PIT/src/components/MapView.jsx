@@ -36,14 +36,47 @@ export default function MapViewComponent({ selectedState, selectedCocnums = [] }
     });
 
     const cocLayer = new FeatureLayer({
-      url: "https://services.arcgis.com/CkYmj4Spu6bZ7mge/arcgis/rest/services/COC_Boundaries/FeatureServer",
+      url: "https://services.arcgis.com/VTyQ9soqVukalItT/arcgis/rest/services/CoC_Geo_Type/FeatureServer",
       id: "coc-boundaries",
       outFields: ["*"],
-      featureReduction: { type: "selection" }
+      featureReduction: { type: "selection" },
+
+      // ---- SYMBOLIZE ----
+      renderer: {
+        type: "simple",
+        symbol: {
+          type: "simple-fill",
+          color: [217, 200, 161, 0.65], 
+          outline: {
+            color: "#7A766F",
+            width: 0.8
+          }
+        }
+      },
+
+      // ---- LABELS ----
+      labelingInfo: [
+        {
+          labelExpressionInfo: { expression: "$feature.COCNUM" }, 
+          minScale: 4636162,
+          symbol: {
+            type: "text",
+            color: "black",
+            haloColor: "white",
+            haloSize: 1,
+            font: {
+              family: "Roboto",
+              size: 10,
+              weight: "bold"
+            }
+          }
+        }
+      ]
     });
 
     layerRef.current = cocLayer;
     map.add(cocLayer);
+
 
     const view = new MapView({
       container: mapDiv.current,
@@ -113,7 +146,7 @@ export default function MapViewComponent({ selectedState, selectedCocnums = [] }
   // ---- RENDER MAP + LOADING INDICATOR ----
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>
-      
+
       {isLoading && (
         <div
           style={{
