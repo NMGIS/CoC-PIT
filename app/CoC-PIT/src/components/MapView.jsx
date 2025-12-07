@@ -25,6 +25,8 @@ export default function MapViewComponent({ selectedState, selectedCocnums = [] }
   const mapDiv = useRef(null);
   const layerRef = useRef(null);
   const viewRef = useRef(null);
+  const legacyLayerRef = useRef(null);
+
 
   const [isLoading, setIsLoading] = useState(true);
   const layerViewRef = useRef(null);
@@ -46,7 +48,7 @@ export default function MapViewComponent({ selectedState, selectedCocnums = [] }
         type: "simple",
         symbol: {
           type: "simple-fill",
-          color: [217, 200, 161, 0.65], 
+          color: [217, 200, 161, 0.65],
           outline: {
             color: "#7A766F",
             width: 0.8
@@ -57,7 +59,7 @@ export default function MapViewComponent({ selectedState, selectedCocnums = [] }
       // ---- LABELS ----
       labelingInfo: [
         {
-          labelExpressionInfo: { expression: "$feature.COCNUM" }, 
+          labelExpressionInfo: { expression: "$feature.COCNUM" },
           minScale: 4636162,
           symbol: {
             type: "text",
@@ -76,6 +78,35 @@ export default function MapViewComponent({ selectedState, selectedCocnums = [] }
 
     layerRef.current = cocLayer;
     map.add(cocLayer);
+
+    // ---- LEGACY COC POLYGONS LAYER ----
+    const legacyCocLayer = new FeatureLayer({
+      url: "https://services.arcgis.com/CkYmj4Spu6bZ7mge/arcgis/rest/services/COC_Boundaries_Legacy/FeatureServer",
+      id: "legacy-coc-boundaries",
+      outFields: ["*"],
+
+      labelingInfo: [
+        {
+          labelExpressionInfo: { expression: "$feature.COCNUM" },  // adjust if needed
+          minScale: 4636162,
+          symbol: {
+            type: "text",
+            color: "black",
+            haloColor: "white",
+            haloSize: 1,
+            font: {
+              family: "Roboto",
+              size: 10,
+              weight: "bold"
+            }
+          }
+        }
+      ]
+    });
+
+    map.add(legacyCocLayer);
+    legacyLayerRef.current = legacyCocLayer;
+
 
 
     const view = new MapView({
