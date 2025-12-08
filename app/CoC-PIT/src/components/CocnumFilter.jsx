@@ -6,11 +6,13 @@ export default function CocnumFilter({
   value = [],
   onChange,
   cocnums = [],
-  labelMap = {}
+  labelMap = {},
+  includeNoneOption = false   // <-- NEW
 }) {
 
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
+
 
   // Close dropdown if clicked outside
   useEffect(() => {
@@ -24,12 +26,25 @@ export default function CocnumFilter({
   }, []);
 
   const toggleValue = (c) => {
-    let newValues = value.includes(c)
-      ? value.filter((v) => v !== c)
-      : [...value, c];
+    if (c === "NONE") {
+      // If "None" is selected → everything else resets
+      onChange(["NONE"]);
+      return;
+    }
+
+    // Otherwise, user is selecting real items, so remove NONE
+    let cleaned = value.filter(v => v !== "NONE");
+
+    let newValues = cleaned.includes(c)
+      ? cleaned.filter((v) => v !== c)
+      : [...cleaned, c];
+
+    // If all items get unchecked → fallback to NONE
+    if (newValues.length === 0) newValues = ["NONE"];
 
     onChange(newValues);
   };
+
 
   return (
     <div style={{ position: "relative" }} ref={dropdownRef}>
@@ -46,7 +61,10 @@ export default function CocnumFilter({
         }}
         onClick={() => setOpen((prev) => !prev)}
       >
-        {value.length === 0 ? label : `${value.length} selected`}
+        {value.includes("NONE") || value.length === 0
+          ? label
+          : `${value.length} selected`}
+
         <span style={{ fontSize: "16px", opacity: 0.8 }}>˅</span>
       </button>
 
@@ -67,9 +85,32 @@ export default function CocnumFilter({
             overflowY: "auto",
           }}
         >
-          {cocnums.map((c) => {
-            const displayLabel = labelMap[c] ?? c;  // use labelMap if available
 
+          {/* --- NONE OPTION (shown at top of list) --- */}
+          {includeNoneOption && (
+            <label
+              key="NONE"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "4px 0",
+                color: "white",
+                cursor: "pointer",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={value.includes("NONE")}
+                onChange={() => toggleValue("NONE")}
+              />
+              None
+            </label>
+          )}
+
+          {/* --- NORMAL LIST ITEMS --- */}
+          {cocnums.map((c) => {
+            const displayLabel = labelMap[c] ?? c;
             return (
               <label
                 key={c}
@@ -94,6 +135,7 @@ export default function CocnumFilter({
 
         </div>
       )}
+
     </div>
   );
 }

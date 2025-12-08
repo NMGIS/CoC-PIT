@@ -319,7 +319,8 @@ export default function App() {
   // ---- FILTER STATES ---
 
   const [selectedCurrentCocnums, setSelectedCurrentCocnums] = useState([]);
-  const [selectedLegacyCocnums, setSelectedLegacyCocnums] = useState([]);
+  const [selectedLegacyCocnums, setSelectedLegacyCocnums] = useState(["NONE"]);
+ 
 
   const filteredCurrentList = selectedState
     ? cocList.filter(c => {
@@ -341,13 +342,13 @@ export default function App() {
   const handleReset = () => {
     setSelectedState("");
     setSelectedCurrentCocnums([]);
-    setSelectedLegacyCocnums([]);
+    setSelectedLegacyCocnums(["NONE"]);
   };
 
   const handleStateChange = (state) => {
     setSelectedState(state);
     setSelectedCurrentCocnums([]);
-    setSelectedLegacyCocnums([]);
+    setSelectedLegacyCocnums(["NONE"]);
   };
 
 
@@ -390,7 +391,9 @@ export default function App() {
             onChange={setSelectedLegacyCocnums}
             cocnums={filteredLegacyList}
             labelMap={legacyLabelMap}
+            includeNoneOption={true}
           />
+
 
 
 

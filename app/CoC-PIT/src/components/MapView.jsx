@@ -37,11 +37,19 @@ export default function MapViewComponent({ selectedState, selectedCurrent = [], 
   }
 
   function buildLegacyExpr(state, cocnums) {
+    if (cocnums.includes("NONE")) {
+      return "1=0";  // returns nothing
+    }
+
     let parts = [];
     if (state) parts.push(`STATE_NAME = '${state}'`);
-    if (cocnums.length > 0) parts.push(`COCNUM IN (${cocnums.map(c => `'${c}'`).join(",")})`);
+    if (cocnums.length > 0) {
+      parts.push(`COCNUM IN (${cocnums.map(c => `'${c}'`).join(",")})`);
+    }
+
     return parts.length ? parts.join(" AND ") : null;
   }
+
 
 
   // ---- INITIALIZE MAP & LAYER ----
@@ -174,11 +182,15 @@ export default function MapViewComponent({ selectedState, selectedCurrent = [], 
     legacyLayer.definitionExpression = legExpr;
 
     // ZOOM — use the layer with the most restrictive filter
-    const zoomLayer = selectedCurrent.length > 0
+    const hasCurrent = selectedCurrent.length > 0;
+    const hasLegacy = selectedLegacy.length > 0 && !selectedLegacy.includes("NONE");
+
+    const zoomLayer = hasCurrent
       ? currentLayer
-      : selectedLegacy.length > 0
+      : hasLegacy
         ? legacyLayer
         : currentLayer;
+
 
     const expr = zoomLayer.definitionExpression;
 
