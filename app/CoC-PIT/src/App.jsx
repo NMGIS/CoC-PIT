@@ -320,7 +320,7 @@ export default function App() {
 
   const [selectedCurrentCocnums, setSelectedCurrentCocnums] = useState([]);
   const [selectedLegacyCocnums, setSelectedLegacyCocnums] = useState(["NONE"]);
- 
+
 
   const filteredCurrentList = selectedState
     ? cocList.filter(c => {
@@ -380,12 +380,14 @@ export default function App() {
 
           {/* CURRENT COCNUMS */}
           <CocnumFilter
+            type="current"
             value={selectedCurrentCocnums}
             onChange={setSelectedCurrentCocnums}
             cocnums={filteredCurrentList}
           />
 
           <CocnumFilter
+            type="legacy"
             label="Legacy COCNUM"
             value={selectedLegacyCocnums}
             onChange={setSelectedLegacyCocnums}

@@ -2,13 +2,15 @@ import { useState, useRef, useEffect } from "react";
 import "../App.css";
 
 export default function CocnumFilter({
+  type = "current",       // <-- NEW
   label = "COCNUM",
   value = [],
   onChange,
   cocnums = [],
   labelMap = {},
-  includeNoneOption = false   // <-- NEW
+  includeNoneOption = false
 }) {
+
 
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -40,7 +42,10 @@ export default function CocnumFilter({
       : [...cleaned, c];
 
     // If all items get unchecked → fallback to NONE
-    if (newValues.length === 0) newValues = ["NONE"];
+    if (newValues.length === 0) {
+  newValues = type === "legacy" ? ["NONE"] : [];   // <-- FIX
+}
+
 
     onChange(newValues);
   };
