@@ -1,7 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import "../App.css";
 
-export default function CocnumFilter({ label = "COCNUM", value = [], onChange, cocnums = [] }) {
+export default function CocnumFilter({
+  label = "COCNUM",
+  value = [],
+  onChange,
+  cocnums = [],
+  labelMap = {}
+}) {
+
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -60,26 +67,31 @@ export default function CocnumFilter({ label = "COCNUM", value = [], onChange, c
             overflowY: "auto",
           }}
         >
-          {cocnums.map((c) => (
-            <label
-              key={c}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "4px 0",
-                color: "white",
-                cursor: "pointer",
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={value.includes(c)}
-                onChange={() => toggleValue(c)}
-              />
-              {c}
-            </label>
-          ))}
+          {cocnums.map((c) => {
+            const displayLabel = labelMap[c] ?? c;  // use labelMap if available
+
+            return (
+              <label
+                key={c}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "4px 0",
+                  color: "white",
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={value.includes(c)}
+                  onChange={() => toggleValue(c)}
+                />
+                {displayLabel}
+              </label>
+            );
+          })}
+
         </div>
       )}
     </div>

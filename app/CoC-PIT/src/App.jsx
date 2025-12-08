@@ -141,6 +141,115 @@ export default function App() {
     "WA-506", "WA-507"
   ];
 
+  const legacyYearMap = {
+    "AR-502": 2009,
+    "AR-504": 2019,
+    "AR-506": 2009,
+    "AR-507": 2011,
+    "AR-509": 2007,
+    "AR-510": 2007,
+    "AR-512": 2017,
+    "CA-528": 2011,
+    "CA-605": 2012,
+    "CA-610": 2010,
+    "CA-615": 2015,
+    "CT-500": 2010,
+    "CT-501": 2012,
+    "CT-502": 2015,
+    "CT-504": 2009,
+    "CT-506": 2014,
+    "CT-507": 2009,
+    "CT-508": 2014,
+    "CT-509": 2010,
+    "CT-510": 2010,
+    "CT-512": 2014,
+    "FL-516": 2014,
+    "IL-505": 2010,
+    "IL-509": 2018,
+    "IN-500": 2016,
+    "KS-500": 2007,
+    "KS-501": 2015,
+    "LA-501": 2014,
+    "LA-504": 2016,
+    "LA-508": 2017,
+    "MA Shared Jurisdiction": 2008,
+    "MA-501": 2011,
+    "MA-508": 2019,
+    "MA-510": 2020,
+    "MA-510 and MA-516 Shared Jurisdiction": 2019,
+    "MA-510_513_516_518_Shared_Jurisdiction": 2014,
+    "MA-510_MA-513_MA-516_MA-518 Shared Jurisdiction": 2011,
+    "MA-510_MA-513_MA-516_Shared_Jurisdiction": 2012,
+    "MA-510_MA-516_MA-518_Shared_Jurisdiction": 2016,
+    "MA-510_MA-516_Shared_Jurisdiction": 2017,
+    "MA-510_and_MA-516_Shared_Jurisdiction": 2020,
+    "MA-512": 2011,
+    "MA-513": 2014,
+    "MA-514": 2008,
+    "MA-517": 2019,
+    "MA-518": 2016,
+    "MA-519": 2023,
+    "MA-520": 2014,
+    "MA_510_MA_516_Shared_Jurisdiction": 2018,
+    "MD-500": 2019,
+    "MD-502": 2021,
+    "MD-507": 2019,
+    "MD-508": 2019,
+    "MD-509": 2022,
+    "MD-510": 2019,
+    "MD-512": 2019,
+    "ME-501": 2011,
+    "ME-502": 2016,
+    "MI-513": 2019,
+    "MI-521": 2007,
+    "MI-522": 2009,
+    "MI-524": 2007,
+    "MN-507": 2007,
+    "MN-510": 2010,
+    "MN-512": 2007,
+    "MO-601": 2007,
+    "NC-508": 2008,
+    "NE-503": 2009,
+    "NE-504": 2010,
+    "NE-505": 2010,
+    "NE-506": 2010,
+    "NJ-505": 2012,
+    "NJ-517": 2007,
+    "NJ-518": 2014,
+    "NJ-519": 2010,
+    "NJ-520": 2012,
+    "NY-502": 2015,
+    "NY-504": 2019,
+    "NY-506": 2012,
+    "NY-509": 2014,
+    "NY-515": 2007,
+    "NY-516": 2019,
+    "NY-517": 2014,
+    "NY-521": 2007,
+    "NY-524": 2012,
+    "NY-605": 2011,
+    "NY-607": 2019,
+    "NY-609": 2007,
+    "PA-507": 2014,
+    "PA-602": 2014,
+    "SC-504": 2009,
+    "TX-501": 2012,
+    "TX-504": 2012,
+    "TX-610": 2011,
+    "TX-613": 2009,
+    "TX-702": 2011,
+    "TX-703": 2014,
+    "TX-704": 2010,
+    "VA-509": 2012,
+    "VA-510": 2012,
+    "VA-512": 2010,
+    "VA-517": 2012,
+    "VA-518": 2011,
+    "VA-519": 2010,
+    "WA-506": 2007,
+    "WA-507": 2017,
+  };
+
   const stateToPrefix = {
     "Alabama": "AL",
     "Alaska": "AK",
@@ -199,6 +308,13 @@ export default function App() {
     "Wisconsin": "WI",
     "Wyoming": "WY"
   };
+
+  const legacyLabelMap = legacyList.reduce((acc, id) => {
+    const year = legacyYearMap[id];
+    acc[id] = year ? `${id} (${year})` : id;  // fallback to just id if missing
+    return acc;
+  }, {});
+
 
   // ---- FILTER STATES ---
 
@@ -273,7 +389,9 @@ export default function App() {
             value={selectedLegacyCocnums}
             onChange={setSelectedLegacyCocnums}
             cocnums={filteredLegacyList}
+            labelMap={legacyLabelMap}
           />
+
 
 
         </div>
