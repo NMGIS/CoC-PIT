@@ -311,14 +311,67 @@ export default function App() {
     "Wyoming": "WY"
   };
 
+  const groupToTables = {
+    "Overall Homeless": [
+      "overall_homeless",
+      "overall_homeless_individuals",
+      "overall_homeless_parenting_youth_under_25",
+      "overall_homeless_people_in_families",
+      "overall_homeless_unaccompanied_youth_under_25",
+      "overall_homeless_veterans",
+      "various_totals",
+      "Youth_Totals_Under_Less_than_18_or_18_to_24",
+      "Parenting_Youth_Totals_Under_Less_than_18_or_18_to_24"
+    ],
+    "Sheltered ES Homeless": [
+      "sheltered_es_homeless",
+      "sheltered_es_homeless_individuals",
+      "sheltered_es_homeless_parenting_youth_under_25",
+      "sheltered_es_homeless_people_in_families",
+      "sheltered_es_homeless_unaccompanied_youth_under_25",
+      "sheltered_es_homeless_veterans"
+    ],
+    "Sheltered SH Homeless": [
+      "sheltered_sh_homeless",
+      "sheltered_sh_homeless_individuals",
+      "sheltered_sh_homeless_people_in_families",
+      "sheltered_sh_homeless_unaccompanied_youth_under_25",
+      "sheltered_sh_homeless_veterans"
+    ],
+    "Sheltered TH Homeless": [
+      "sheltered_th_homeless",
+      "sheltered_th_homeless_individuals",
+      "sheltered_th_homeless_parenting_youth_under_25",
+      "sheltered_th_homeless_people_in_families",
+      "sheltered_th_homeless_unaccompanied_youth_under_25",
+      "sheltered_th_homeless_veterans"
+    ],
+    "Sheltered Total Homeless": [
+      "sheltered_total_homeless",
+      "sheltered_total_homeless_individuals",
+      "sheltered_total_homeless_parenting_youth_under_25",
+      "sheltered_total_homeless_people_in_families",
+      "sheltered_total_homeless_unaccompanied_youth_under_25",
+      "sheltered_total_homeless_veterans"
+    ],
+    "Unsheltered Homeless": [
+      "unsheltered_homeless",
+      "unsheltered_homeless_individuals",
+      "unsheltered_homeless_parenting_youth_under_25",
+      "unsheltered_homeless_people_in_families",
+      "unsheltered_homeless_unaccompanied_youth_under_25",
+      "unsheltered_homeless_veterans"
+    ]
+
+  };
+
+
   const legacyLabelMap = legacyList.reduce((acc, id) => {
     const year = legacyYearMap[id];
-    acc[id] = year ? `${id} (${year})` : id;  // fallback to just id if missing
+    acc[id] = year ? `${id} (${year})` : id;
     return acc;
   }, {});
 
-
-  // ---- FILTER STATES ---
 
   const [selectedCurrentCocnums, setSelectedCurrentCocnums] = useState([]);
   const [selectedLegacyCocnums, setSelectedLegacyCocnums] = useState(["NONE"]);

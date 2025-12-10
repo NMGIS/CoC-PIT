@@ -2,10 +2,10 @@ export default function HomelessGroupFilter({ value, onChange }) {
 
   const groups = [
     "Overall Homeless",
+    "Sheltered Total Homeless",
     "Sheltered ES Homeless",
     "Sheltered SH Homeless",
     "Sheltered TH Homeless",
-    "Sheltered Total Homeless",
     "Unsheltered Homeless"
   ];
 
