@@ -6,6 +6,13 @@ import CocnumFilter from "./components/COCNUMFilter";
 import YearFilter from "./components/YearFilter";
 import HomelessGroupFilter from "./components/HomelessGroupFilter";  // NEW
 import "./App.css";
+import OverallDashboard from "./components/dashboards/OverallDashboard";
+import ShelteredESDashboard from "./components/dashboards/ShelteredESDashboard";
+import ShelteredSHDashboard from "./components/dashboards/ShelteredSHDashboard";
+import ShelteredTHDashboard from "./components/dashboards/ShelteredTHDashboard";
+import ShelteredTotalDashboard from "./components/dashboards/ShelteredTotalDashboard";
+import UnshelteredDashboard from "./components/dashboards/UnshelteredDashboard";
+
 
 export default function App() {
   // ---- FILTER STATES ----
@@ -365,6 +372,23 @@ export default function App() {
 
   };
 
+  function renderDashboard() {
+  switch (selectedGroup) {
+    case "Overall Homeless":
+      return <OverallDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
+    case "Sheltered ES Homeless":
+      return <ShelteredESDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
+    case "Sheltered SH Homeless":
+      return <ShelteredSHDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
+    case "Sheltered TH Homeless":
+      return <ShelteredTHDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
+    case "Sheltered Total Homeless":
+      return <ShelteredTotalDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
+    case "Unsheltered Homeless":
+      return <UnshelteredDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
+  }
+}
+
 
   const legacyLabelMap = legacyList.reduce((acc, id) => {
     const year = legacyYearMap[id];
@@ -469,7 +493,7 @@ export default function App() {
 
         </div>
       }
-      left={<div style={{ color: "white" }}>Charts + Big Numbers</div>}
+      left={renderDashboard()}
       map={<MapViewComponent
         selectedState={selectedState}
         selectedCurrent={selectedCurrentCocnums}

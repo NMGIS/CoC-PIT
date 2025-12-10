@@ -16,7 +16,6 @@ export default function HomelessGroupFilter({ value, onChange }) {
       onChange={(e) => onChange(e.target.value)}
       style={{ width: "220px" }}
     >
-      <option value="">Select Group</option>
       {groups.map(g => (
         <option key={g} value={g}>{g}</option>
       ))}
