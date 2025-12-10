@@ -3,6 +3,7 @@ import MapViewComponent from "./components/MapView";
 import Layout from "./components/Layout";
 import StateFilter from "./components/StateFilter";
 import CocnumFilter from "./components/COCNUMFilter";
+import YearFilter from "./components/YearFilter";
 import "./App.css";
 
 export default function App() {
@@ -320,7 +321,7 @@ export default function App() {
 
   const [selectedCurrentCocnums, setSelectedCurrentCocnums] = useState([]);
   const [selectedLegacyCocnums, setSelectedLegacyCocnums] = useState(["NONE"]);
-
+  const [selectedYear, setSelectedYear] = useState("");
 
   const filteredCurrentList = selectedState
     ? cocList.filter(c => {
@@ -371,6 +372,13 @@ export default function App() {
           >
             Reset Filters
           </button>
+
+
+          <YearFilter
+            value={selectedYear}
+            onChange={setSelectedYear}
+          />
+
 
           {/* STATE FILTER */}
           <StateFilter
