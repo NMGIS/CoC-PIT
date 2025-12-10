@@ -4,6 +4,7 @@ import Layout from "./components/Layout";
 import StateFilter from "./components/StateFilter";
 import CocnumFilter from "./components/COCNUMFilter";
 import YearFilter from "./components/YearFilter";
+import HomelessGroupFilter from "./components/HomelessGroupFilter";  // NEW
 import "./App.css";
 
 export default function App() {
@@ -321,7 +322,8 @@ export default function App() {
 
   const [selectedCurrentCocnums, setSelectedCurrentCocnums] = useState([]);
   const [selectedLegacyCocnums, setSelectedLegacyCocnums] = useState(["NONE"]);
-  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedYear, setSelectedYear] = useState("2024");
+  const [selectedGroup, setSelectedGroup] = useState("Overall Homeless");
 
   const filteredCurrentList = selectedState
     ? cocList.filter(c => {
@@ -372,6 +374,11 @@ export default function App() {
           >
             Reset Filters
           </button>
+
+          <HomelessGroupFilter
+            value={selectedGroup}
+            onChange={setSelectedGroup}
+          />
 
 
           <YearFilter
