@@ -373,21 +373,29 @@ export default function App() {
   };
 
   function renderDashboard() {
-  switch (selectedGroup) {
-    case "Overall Homeless":
-      return <OverallDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
-    case "Sheltered ES Homeless":
-      return <ShelteredESDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
-    case "Sheltered SH Homeless":
-      return <ShelteredSHDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
-    case "Sheltered TH Homeless":
-      return <ShelteredTHDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
-    case "Sheltered Total Homeless":
-      return <ShelteredTotalDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
-    case "Unsheltered Homeless":
-      return <UnshelteredDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
+    switch (selectedGroup) {
+      case "Overall Homeless":
+        return (
+          <OverallDashboard
+            year={selectedYear}
+            state={selectedState}
+            currentCocnums={selectedCurrentCocnums}
+            legacyCocnums={selectedLegacyCocnums}
+          />
+        );
+
+      case "Sheltered ES Homeless":
+        return <ShelteredESDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
+      case "Sheltered SH Homeless":
+        return <ShelteredSHDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
+      case "Sheltered TH Homeless":
+        return <ShelteredTHDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
+      case "Sheltered Total Homeless":
+        return <ShelteredTotalDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
+      case "Unsheltered Homeless":
+        return <UnshelteredDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
+    }
   }
-}
 
 
   const legacyLabelMap = legacyList.reduce((acc, id) => {
