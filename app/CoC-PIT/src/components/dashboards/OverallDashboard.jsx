@@ -16,19 +16,17 @@ export default function OverallDashboard({ year, state, currentCocnums, legacyCo
         query = query.eq("state_name", state);  // <-- confirm your column name
       }
 
-      // --- FILTER BY CURRENT COCNUMS ---
-      if (currentCocnums && currentCocnums.length > 0) {
-        query = query.in("cocnum", currentCocnums);
-      }
-
-      // --- FILTER BY LEGACY COCNUMS ---
+      // --- FILTER BY COCNUM (LEGACY > CURRENT) ---
       if (
         legacyCocnums &&
         legacyCocnums.length > 0 &&
         !legacyCocnums.includes("NONE")
       ) {
         query = query.in("cocnum", legacyCocnums);
+      } else if (currentCocnums && currentCocnums.length > 0) {
+        query = query.in("cocnum", currentCocnums);
       }
+
 
       const { data, error } = await query;
       if (error) {
@@ -39,6 +37,14 @@ export default function OverallDashboard({ year, state, currentCocnums, legacyCo
       const sum = data.reduce((acc, row) => acc + (row.a0003 || 0), 0);
       setTotalA0003(sum);
     }
+
+    console.log("OverallDashboard filters:", {
+      year,
+      state,
+      currentCocnums,
+      legacyCocnums
+    });
+
 
     fetchMetric();
   }, [year, state, currentCocnums, legacyCocnums]);
