@@ -412,7 +412,7 @@ export default function App() {
   const [selectedYear, setSelectedYear] = useState("2024");
   const [selectedGroup, setSelectedGroup] = useState("Overall Homeless");
 
-   useEffect(() => {
+  useEffect(() => {
     setSelectedLegacyCocnums(["NONE"]);
   }, [selectedYear]);
 
@@ -447,7 +447,9 @@ export default function App() {
     setSelectedState("");
     setSelectedCurrentCocnums([]);
     setSelectedLegacyCocnums(["NONE"]);
+    setSelectedYear("2024");
   };
+
 
   const handleStateChange = (state) => {
     setSelectedState(state);
