@@ -17,15 +17,27 @@ export default function OverallDashboard({ year, state, currentCocnums, legacyCo
       }
 
       // --- FILTER BY COCNUM (LEGACY > CURRENT) ---
+      // --- FILTER BY COCNUM (LEGACY + CURRENT UNION) ---
+      const cocnums = [];
+
+      // Legacy (ignore NONE)
       if (
         legacyCocnums &&
         legacyCocnums.length > 0 &&
         !legacyCocnums.includes("NONE")
       ) {
-        query = query.in("cocnum", legacyCocnums);
-      } else if (currentCocnums && currentCocnums.length > 0) {
-        query = query.in("cocnum", currentCocnums);
+        cocnums.push(...legacyCocnums);
       }
+
+      // Current
+      if (currentCocnums && currentCocnums.length > 0) {
+        cocnums.push(...currentCocnums);
+      }
+
+      if (cocnums.length > 0) {
+        query = query.in("cocnum", cocnums);
+      }
+
 
 
       const { data, error } = await query;

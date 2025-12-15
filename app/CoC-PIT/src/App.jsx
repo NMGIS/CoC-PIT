@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useEffect } from "react";
 import MapViewComponent from "./components/MapView";
 import Layout from "./components/Layout";
 import StateFilter from "./components/StateFilter";
@@ -372,6 +373,7 @@ export default function App() {
 
   };
 
+
   function renderDashboard() {
     switch (selectedGroup) {
       case "Overall Homeless":
@@ -410,6 +412,11 @@ export default function App() {
   const [selectedYear, setSelectedYear] = useState("2024");
   const [selectedGroup, setSelectedGroup] = useState("Overall Homeless");
 
+   useEffect(() => {
+    setSelectedLegacyCocnums(["NONE"]);
+  }, [selectedYear]);
+
+
   const filteredCurrentList = selectedState
     ? cocList.filter(c => {
       const prefix = stateToPrefix[selectedState];
@@ -418,13 +425,22 @@ export default function App() {
     })
     : cocList;
 
-  const filteredLegacyList = selectedState
-    ? legacyList.filter(c => {
+  const filteredLegacyList = legacyList.filter(c => {
+    // --- FILTER BY YEAR ---
+    if (legacyYearMap[c] !== Number(selectedYear)) {
+      return false;
+    }
+
+    // --- FILTER BY STATE (if selected) ---
+    if (selectedState) {
       const prefix = stateToPrefix[selectedState];
       if (prefix === "MA") return c.startsWith("MA");
       return c.startsWith(prefix + "-");
-    })
-    : legacyList;
+    }
+
+    return true;
+  });
+
 
   // ---- RESET ALL FILTERS ----
   const handleReset = () => {

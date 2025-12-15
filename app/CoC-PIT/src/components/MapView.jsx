@@ -5,21 +5,6 @@ import MapView from "@arcgis/core/views/MapView";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import { supabase } from "../supabaseClient";
 
-function buildDefinitionExpression(state, cocnums) {
-  let parts = [];
-
-  if (state && state !== "") {
-    parts.push(`STATE_NAME = '${state}'`);
-  }
-
-  if (cocnums && cocnums.length > 0) {
-    const list = cocnums.map(c => `'${c}'`).join(",");
-    parts.push(`COCNUM IN (${list})`);
-  }
-
-  if (parts.length === 0) return null; // remove filter
-  return parts.join(" AND ");
-}
 
 export default function MapViewComponent({ selectedState, selectedCurrent = [], selectedLegacy = [] }) {
   const mapDiv = useRef(null);
@@ -29,12 +14,25 @@ export default function MapViewComponent({ selectedState, selectedCurrent = [], 
   const [isLoading, setIsLoading] = useState(true);
   const layerViewRef = useRef(null);
 
-  function buildCurrentExpr(state, cocnums) {
-    let parts = [];
-    if (state) parts.push(`STATE_NAME = '${state}'`);
-    if (cocnums.length > 0) parts.push(`COCNUM IN (${cocnums.map(c => `'${c}'`).join(",")})`);
-    return parts.length ? parts.join(" AND ") : null;
+function buildCurrentExpr(state, currentCocnums, legacyCocnums) {
+  // If legacy selected and no current selected → show NOTHING
+  if (
+    legacyCocnums.length > 0 &&
+    !legacyCocnums.includes("NONE") &&
+    currentCocnums.length === 0
+  ) {
+    return "1=0";
   }
+
+  let parts = [];
+  if (state) parts.push(`STATE_NAME = '${state}'`);
+  if (currentCocnums.length > 0) {
+    parts.push(`COCNUM IN (${currentCocnums.map(c => `'${c}'`).join(",")})`);
+  }
+
+  return parts.length ? parts.join(" AND ") : null;
+}
+
 
   function buildLegacyExpr(state, cocnums) {
     if (cocnums.includes("NONE")) {
@@ -49,8 +47,6 @@ export default function MapViewComponent({ selectedState, selectedCurrent = [], 
 
     return parts.length ? parts.join(" AND ") : null;
   }
-
-
 
   // ---- INITIALIZE MAP & LAYER ----
   useEffect(() => {
@@ -175,7 +171,11 @@ export default function MapViewComponent({ selectedState, selectedCurrent = [], 
 
     if (!currentLayer || !legacyLayer || !view) return;
 
-    const currExpr = buildCurrentExpr(selectedState, selectedCurrent);
+    const currExpr = buildCurrentExpr(
+      selectedState,
+      selectedCurrent,
+      selectedLegacy
+    );
     const legExpr = buildLegacyExpr(selectedState, selectedLegacy);
 
     currentLayer.definitionExpression = currExpr;
