@@ -1,5 +1,48 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabaseClient";
+import PopulationGroupSelector from "../PopulationGroupSelector";
+
+/**
+ * Population configuration:
+ * - which table to query
+ * - which field represents the TOTAL for that cohort
+ */
+const populationConfig = {
+  all: {
+    table: "overall_homeless",
+    totalField: "a0003"
+  },
+  individuals: {
+    table: "overall_homeless_individuals",
+    totalField: "a0249"
+  },
+  families: {
+    table: "overall_homeless_people_in_families",
+    totalField: "a0495"
+  },
+  veterans: {
+    table: "overall_homeless_veterans",
+    totalField: "a0719"
+  },
+  unaccompanied_youth: {
+    table: "overall_homeless_unaccompanied_youth_under_25",
+    totalField: "a0917"
+  },
+  parenting_youth: {
+    table: "overall_homeless_parenting_youth_under_25",
+    totalField: "a1127"
+  }
+};
+
+// --- LABELS FOR HEADER ---
+const populationLabels = {
+  all: "Overall Homeless",
+  individuals: "Individuals Experiencing Homelessness",
+  families: "People in Families Experiencing Homelessness",
+  veterans: "Veterans Experiencing Homelessness",
+  unaccompanied_youth: "Unaccompanied Youth Experiencing Homelessness",
+  parenting_youth: "Parenting Youth Experiencing Homelessness"
+};
 
 export default function OverallDashboard({
   year,
@@ -7,21 +50,27 @@ export default function OverallDashboard({
   currentCocnums,
   legacyCocnums
 }) {
-  const [totalA0003, setTotalA0003] = useState(null);
+  // --- POPULATION SELECTOR STATE ---
+  const [populationGroup, setPopulationGroup] = useState("all");
+
+  // --- METRIC STATE ---
+  const [totalValue, setTotalValue] = useState(null);
   const [hasData, setHasData] = useState(null);
   const [breakdown, setBreakdown] = useState([]);
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     async function fetchMetric() {
-      setTotalA0003(null);
+      setTotalValue(null);
       setHasData(null);
       setBreakdown([]);
       setExpanded(false);
 
+      const { table, totalField } = populationConfig[populationGroup];
+
       let query = supabase
-        .from("overall_homeless")
-        .select("cocnum, a0003")
+        .from(table)
+        .select(`cocnum, ${totalField}`)
         .eq("year", year);
 
       if (state && state !== "") {
@@ -50,36 +99,37 @@ export default function OverallDashboard({
       const { data, error } = await query;
 
       if (error) {
-        console.error("Error fetching overall homeless metric:", error);
+        console.error("Error fetching homeless metric:", error);
         setHasData(false);
-        setTotalA0003(null);
         return;
       }
 
       // --- NO DATA CASES ---
       if (!data || data.length === 0) {
         setHasData(false);
-        setTotalA0003(null);
         return;
       }
 
       const nonNullValues = data
-        .map(row => row.a0003)
+        .map(row => row[totalField])
         .filter(v => v !== null && v !== undefined);
 
       if (nonNullValues.length === 0) {
         setHasData(false);
-        setTotalA0003(null);
         return;
       }
 
       // --- TOTAL ---
-      const sum = data.reduce((acc, row) => acc + (row.a0003 ?? 0), 0);
+      const sum = data.reduce(
+        (acc, row) => acc + (row[totalField] ?? 0),
+        0
+      );
 
       // --- BREAKDOWN BY COCNUM ---
       const grouped = data.reduce((acc, row) => {
         if (!row.cocnum) return acc;
-        acc[row.cocnum] = (acc[row.cocnum] || 0) + (row.a0003 ?? 0);
+        acc[row.cocnum] =
+          (acc[row.cocnum] || 0) + (row[totalField] ?? 0);
         return acc;
       }, {});
 
@@ -88,15 +138,27 @@ export default function OverallDashboard({
         .sort((a, b) => b.value - a.value);
 
       setHasData(true);
-      setTotalA0003(sum);
+      setTotalValue(sum);
       setBreakdown(breakdownArr);
     }
 
     fetchMetric();
-  }, [year, state, currentCocnums, legacyCocnums]);
+  }, [
+    year,
+    state,
+    currentCocnums,
+    legacyCocnums,
+    populationGroup
+  ]);
 
   return (
     <div style={{ color: "white" }}>
+      {/* POPULATION SELECTOR */}
+      <PopulationGroupSelector
+        value={populationGroup}
+        onChange={setPopulationGroup}
+      />
+
       {/* HEADER ROW */}
       <div
         style={{
@@ -108,13 +170,13 @@ export default function OverallDashboard({
         }}
         onClick={() => hasData && setExpanded(v => !v)}
       >
-        <strong>Overall Homeless:</strong>
+        <strong>{populationLabels[populationGroup]}:</strong>
 
         {hasData === null
           ? "Loading…"
           : hasData === false
-            ? "No data"
-            : totalA0003.toLocaleString()}
+          ? "No data"
+          : totalValue.toLocaleString()}
 
         {hasData && (
           <span style={{ opacity: 0.7 }}>
