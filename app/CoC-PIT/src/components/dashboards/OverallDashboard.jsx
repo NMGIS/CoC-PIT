@@ -67,17 +67,37 @@ const AGE_FIELDS_OVERALL = [
   { field: "a0011", label: "Over 64" }
 ];
 
-// --- RACE FIELDS (OPTION A: MUTUALLY EXCLUSIVE) ---
+// Chart 2 — RACE (INCLUSIVE, BASE RACE)
 const RACE_FIELDS_OVERALL = [
-  { field: "a0021", label: "Hispanic / Latina/e/o (Any Race)" },
-  { field: "a0040", label: "White (Non-Hispanic)" },
-  { field: "a0034", label: "Black / African American (Non-Hispanic)" },
-  { field: "a0032", label: "Asian (Non-Hispanic)" },
-  { field: "a0030", label: "American Indian / Alaska Native (Non-Hispanic)" },
-  { field: "a0038", label: "Native Hawaiian / Pacific Islander (Non-Hispanic)" },
-  { field: "a0036", label: "Middle Eastern / North African (Non-Hispanic)" },
-  { field: "a0042", label: "Multi-Racial (Non-Hispanic)" }
+  { field: "a0022", label: "American Indian / Alaska Native" },
+  { field: "a0023", label: "Asian" },
+  { field: "a0024", label: "Black" },
+  { field: "a0025", label: "Middle Eastern or North African" },
+  { field: "a0026", label: "Native Hawaiian or Other Pacific Islander" },
+  { field: "a0027", label: "White" },
+  { field: "a0028", label: "Multi-Racial" }
 ];
+
+// Chart 3 — RACE × ETHNICITY (HISPANIC SUBSET)
+const HISPANIC_RACE_FIELDS = [
+  { field: "a0029", label: "American Indian / Alaska Native" },
+  { field: "a0031", label: "Asian" },
+  { field: "a0033", label: "Black" },
+  { field: "a0035", label: "Middle Eastern or North African" },
+  { field: "a0037", label: "Native Hawaiian or Other Pacific Islander" },
+  { field: "a0039", label: "White" },
+  { field: "a0041", label: "Multi-Racial" },
+  { field: "a0043", label: "Hispanic / Latina / e / o Only" }
+];
+
+
+
+// Chart 1 — ETHNICITY (PRIMARY, EXCLUSIVE)
+const ETHNICITY_FIELDS = [
+  { field: "a0021", label: "Hispanic / Latina/e/o" },
+  { field: "a0020", label: "Non-Hispanic / Latina/e/o" }
+];
+
 
 export default function OverallDashboard({
   year,
@@ -94,6 +114,9 @@ export default function OverallDashboard({
   const [genderData, setGenderData] = useState([]);
   const [ageData, setAgeData] = useState([]);
   const [raceData, setRaceData] = useState([]);
+  const [ethnicityData, setEthnicityData] = useState([]);
+  const [hispanicRaceData, setHispanicRaceData] = useState([]);
+
 
   useEffect(() => {
     async function fetchMetric() {
@@ -104,6 +127,9 @@ export default function OverallDashboard({
       setGenderData([]);
       setAgeData([]);
       setRaceData([]);
+      setEthnicityData([]);
+      setHispanicRaceData([]);
+
 
       const { table, totalField } = populationConfig[populationGroup];
 
@@ -125,8 +151,13 @@ export default function OverallDashboard({
       // --- TOTAL QUERY ---
       let query = supabase
         .from(table)
-        .select(`cocnum, ${totalField}`)
+        .select(
+          populationGroup === "all"
+            ? `cocnum, ${totalField}, a0021`
+            : `cocnum, ${totalField}`
+        )
         .eq("year", year);
+
 
       if (state) query = query.eq("state_name", state);
       if (cocnums.length) query = query.in("cocnum", cocnums);
@@ -141,6 +172,13 @@ export default function OverallDashboard({
         (acc, row) => acc + (row[totalField] ?? 0),
         0
       );
+
+      const hispanicTotal = data.reduce(
+        (sum, r) => sum + (r.a0021 || 0),
+        0
+      );
+
+
 
       // --- BUILD COC BREAKDOWN ---
       const grouped = data.reduce((acc, row) => {
@@ -160,9 +198,16 @@ export default function OverallDashboard({
 
       // --- DISTRIBUTIONS (ALL PEOPLE ONLY) ---
       if (populationGroup === "all") {
+        await buildDistribution(ETHNICITY_FIELDS, total, setEthnicityData);
         await buildDistribution(GENDER_FIELDS_OVERALL, total, setGenderData);
         await buildDistribution(AGE_FIELDS_OVERALL, total, setAgeData);
         await buildDistribution(RACE_FIELDS_OVERALL, total, setRaceData);
+        await buildDistribution(
+          HISPANIC_RACE_FIELDS,
+          hispanicTotal,
+          setHispanicRaceData
+        );
+
       }
 
       async function buildDistribution(fields, total, setter) {
@@ -207,10 +252,15 @@ export default function OverallDashboard({
     fetchMetric();
   }, [year, state, currentCocnums, legacyCocnums, populationGroup]);
 
-  const renderChart = (title, data) =>
+  const renderChart = (title, data, subtitle) =>
     data.length > 0 && (
       <div style={{ marginTop: "1.25rem", maxWidth: "100%" }}>
         <strong>{title}</strong>
+        {subtitle && (
+          <div style={{ fontSize: "0.8rem", opacity: 0.85, marginTop: "4px" }}>
+            {subtitle}
+          </div>
+        )}
         {data.map(row => (
           <div
             key={row.label}
@@ -320,9 +370,24 @@ export default function OverallDashboard({
       {/* DISTRIBUTIONS */}
       {populationGroup === "all" && (
         <>
+
           {renderChart("Gender Distribution", genderData)}
           {renderChart("Age Distribution", ageData)}
-          {renderChart("Race / Ethnicity Distribution", raceData)}
+          {renderChart(
+            "Ethnicity (Exclusive)",
+            ethnicityData
+          )}
+          {renderChart(
+            "Race (Inclusive)",
+            raceData,
+            "Race totals include people of Hispanic / Latina / e / o ethnicity."
+          )}
+          {renderChart(
+            "Race × Ethnicity (Hispanic Subset)",
+            hispanicRaceData,
+            "Subset of the Hispanic / Latina / e / o population, broken down by race."
+          )}
+
         </>
       )}
     </div>
