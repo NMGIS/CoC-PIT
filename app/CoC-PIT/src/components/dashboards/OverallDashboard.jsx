@@ -43,7 +43,7 @@ const populationLabels = {
   unaccompanied_youth: "Unaccompanied Youth Experiencing Homelessness",
   parenting_youth: "Parenting Youth Experiencing Homelessness"
 };
-
+// --- OVERALL HOMELESS GROUP---
 // --- GENDER FIELDS ---
 const GENDER_FIELDS_OVERALL = [
   { field: "a0012", label: "Women" },
@@ -90,13 +90,66 @@ const HISPANIC_RACE_FIELDS = [
   { field: "a0043", label: "Hispanic / Latina / e / o Only" }
 ];
 
-
-
 // Chart 1 — ETHNICITY (PRIMARY, EXCLUSIVE)
 const ETHNICITY_FIELDS = [
   { field: "a0021", label: "Hispanic / Latina/e/o" },
   { field: "a0020", label: "Non-Hispanic / Latina/e/o" }
 ];
+
+// --- Overall Homeless Idividuals Group -- //
+// --- GENDER FIELDS ---
+const GENDER_FIELDS_INDIVIDUALS = [
+  { field: "a0258", label: "Women" },
+  { field: "a0259", label: "Men" },
+  { field: "a0260", label: "Transgender" },
+  { field: "a0261", label: "Gender Questioning" },
+  { field: "a0262", label: "Culturally Specific Identity" },
+  { field: "a0263", label: "Different Identity" },
+  { field: "a0264", label: "Non-Binary" },
+  { field: "a0265", label: "More Than One Gender" }
+];
+
+// --- AGE FIELDS (NO a0006) ---
+const AGE_FIELDS_INDIVIDUALS = [
+  { field: "a0250", label: "Under 18" },
+  { field: "a0251", label: "Age 18–24" },
+  { field: "a0253", label: "Age 25–34" },
+  { field: "a0254", label: "Age 35–44" },
+  { field: "a0255", label: "Age 45–54" },
+  { field: "a0256", label: "Age 55–64" },
+  { field: "a0257", label: "Over 64" }
+];
+
+// Chart 1 — ETHNICITY (PRIMARY, EXCLUSIVE) — INDIVIDUALS
+const ETHNICITY_FIELDS_INDIVIDUALS = [
+  { field: "a0267", label: "Hispanic / Latina/e/o" },
+  { field: "a0266", label: "Non-Hispanic / Latina/e/o" }
+];
+
+// Chart 2 — RACE (INCLUSIVE, BASE RACE) — INDIVIDUALS
+const RACE_FIELDS_INDIVIDUALS = [
+  { field: "a0268", label: "American Indian / Alaska Native" },
+  { field: "a0269", label: "Asian" },
+  { field: "a0270", label: "Black" },
+  { field: "a0271", label: "Middle Eastern or North African" },
+  { field: "a0272", label: "Native Hawaiian or Other Pacific Islander" },
+  { field: "a0273", label: "White" },
+  { field: "a0274", label: "Multi-Racial" }
+];
+
+// Chart 3 — RACE × ETHNICITY (HISPANIC SUBSET) — INDIVIDUALS
+const HISPANIC_RACE_FIELDS_INDIVIDUALS = [
+  { field: "a0275", label: "American Indian / Alaska Native" },
+  { field: "a0277", label: "Asian" },
+  { field: "a0279", label: "Black" },
+  { field: "a0281", label: "Middle Eastern or North African" },
+  { field: "a0283", label: "Native Hawaiian or Other Pacific Islander" },
+  { field: "a0285", label: "White" },
+  { field: "a0287", label: "Multi-Racial" },
+  { field: "a0289", label: "Hispanic / Latina / e / o Only" }
+];
+
+
 
 
 export default function OverallDashboard({
@@ -154,9 +207,12 @@ export default function OverallDashboard({
         .select(
           populationGroup === "all"
             ? `cocnum, ${totalField}, a0021`
-            : `cocnum, ${totalField}`
+            : populationGroup === "individuals"
+              ? `cocnum, ${totalField}, a0267`
+              : `cocnum, ${totalField}`
         )
         .eq("year", year);
+
 
 
       if (state) query = query.eq("state_name", state);
@@ -173,10 +229,11 @@ export default function OverallDashboard({
         0
       );
 
-      const hispanicTotal = data.reduce(
-        (sum, r) => sum + (r.a0021 || 0),
-        0
-      );
+      const hispanicTotal =
+        populationGroup === "individuals"
+          ? data.reduce((sum, r) => sum + (r.a0267 || 0), 0)
+          : data.reduce((sum, r) => sum + (r.a0021 || 0), 0);
+
 
 
 
@@ -196,25 +253,70 @@ export default function OverallDashboard({
       setHasData(true);
       setTotalValue(total);
 
-      // --- DISTRIBUTIONS (ALL PEOPLE ONLY) ---
+      // --- Overall Homeless DISTRIBUTIONS (ALL PEOPLE ONLY) ---
       if (populationGroup === "all") {
-        await buildDistribution(ETHNICITY_FIELDS, total, setEthnicityData);
-        await buildDistribution(GENDER_FIELDS_OVERALL, total, setGenderData);
-        await buildDistribution(AGE_FIELDS_OVERALL, total, setAgeData);
-        await buildDistribution(RACE_FIELDS_OVERALL, total, setRaceData);
+        await buildDistribution(ETHNICITY_FIELDS, total, setEthnicityData, table);
+        await buildDistribution(GENDER_FIELDS_OVERALL, total, setGenderData, table);
+        await buildDistribution(AGE_FIELDS_OVERALL, total, setAgeData, table);
+        await buildDistribution(RACE_FIELDS_OVERALL, total, setRaceData, table);
         await buildDistribution(
           HISPANIC_RACE_FIELDS,
           hispanicTotal,
-          setHispanicRaceData
+          setHispanicRaceData,
+          table
         );
-
       }
 
-      async function buildDistribution(fields, total, setter) {
+      // -- Individuals distribution -- //
+      if (populationGroup === "individuals") {
+        await buildDistribution(
+          ETHNICITY_FIELDS_INDIVIDUALS,
+          total,
+          setEthnicityData,
+          table
+        );
+
+        await buildDistribution(
+          GENDER_FIELDS_INDIVIDUALS,
+          total,
+          setGenderData,
+          table
+        );
+
+        await buildDistribution(
+          AGE_FIELDS_INDIVIDUALS,
+          total,
+          setAgeData,
+          table
+        );
+
+        await buildDistribution(
+          RACE_FIELDS_INDIVIDUALS,
+          total,
+          setRaceData,
+          table
+        );
+
+        await buildDistribution(
+          HISPANIC_RACE_FIELDS_INDIVIDUALS,
+          hispanicTotal,
+          setHispanicRaceData,
+          table
+        );
+      }
+
+
+
+
+
+      async function buildDistribution(fields, total, setter, tableName) {
+        if (!tableName) return; // optional guard
+
+
         const selectFields = fields.map(f => f.field).join(",");
 
         let q = supabase
-          .from("overall_homeless")
+          .from(tableName)
           .select(selectFields)
           .eq("year", year);
 
@@ -238,15 +340,15 @@ export default function OverallDashboard({
             .map(f => ({
               label: f.label,
               value: totals[f.field],
-              percent:
-                total > 0
-                  ? Math.round((totals[f.field] / total) * 100)
-                  : 0
+              percent: total > 0
+                ? Math.round((totals[f.field] / total) * 100)
+                : 0
             }))
             .filter(d => d.value > 0 && d.percent > 0)
             .sort((a, b) => b.value - a.value)
         );
       }
+
     }
 
     fetchMetric();
@@ -370,13 +472,25 @@ export default function OverallDashboard({
       {/* DISTRIBUTIONS */}
       {populationGroup === "all" && (
         <>
-
           {renderChart("Gender Distribution", genderData)}
           {renderChart("Age Distribution", ageData)}
-          {renderChart(
-            "Ethnicity (Exclusive)",
-            ethnicityData
+          {renderChart("Ethnicity (Exclusive)", ethnicityData)}
+          {renderChart("Race (Inclusive)", raceData,
+            "Race totals include people of Hispanic / Latina / e / o ethnicity."
           )}
+          {renderChart(
+            "Race × Ethnicity (Hispanic Subset)",
+            hispanicRaceData,
+            "Subset of the Hispanic / Latina / e / o population, broken down by race."
+          )}
+        </>
+      )}
+
+      {populationGroup === "individuals" && (
+        <>
+          {renderChart("Gender Distribution", genderData)}
+          {renderChart("Age Distribution", ageData)}
+          {renderChart("Ethnicity (Exclusive)", ethnicityData)}
           {renderChart(
             "Race (Inclusive)",
             raceData,
@@ -387,9 +501,9 @@ export default function OverallDashboard({
             hispanicRaceData,
             "Subset of the Hispanic / Latina / e / o population, broken down by race."
           )}
-
         </>
       )}
+
     </div>
   );
 }
