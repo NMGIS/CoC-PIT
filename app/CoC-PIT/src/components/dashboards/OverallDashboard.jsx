@@ -44,20 +44,31 @@ const populationLabels = {
   parenting_youth: "Parenting Youth Experiencing Homelessness"
 };
 
+// --- GENDER FIELDS (overall_homeless only) ---
+const GENDER_FIELDS_OVERALL = [
+  { field: "a0012", label: "Women" },
+  { field: "a0013", label: "Men" },
+  { field: "a0014", label: "Transgender" },
+  { field: "a0015", label: "Gender Questioning" },
+  { field: "a0016", label: "Culturally Specific Identity" },
+  { field: "a0017", label: "Different Identity" },
+  { field: "a0018", label: "Non-Binary" },
+  { field: "a0019", label: "More Than One Gender" }
+];
+
 export default function OverallDashboard({
   year,
   state,
   currentCocnums,
   legacyCocnums
 }) {
-  // --- POPULATION SELECTOR STATE ---
+  // --- STATE ---
   const [populationGroup, setPopulationGroup] = useState("all");
-
-  // --- METRIC STATE ---
   const [totalValue, setTotalValue] = useState(null);
   const [hasData, setHasData] = useState(null);
   const [breakdown, setBreakdown] = useState([]);
   const [expanded, setExpanded] = useState(false);
+  const [genderData, setGenderData] = useState([]);
 
   useEffect(() => {
     async function fetchMetric() {
@@ -65,19 +76,11 @@ export default function OverallDashboard({
       setHasData(null);
       setBreakdown([]);
       setExpanded(false);
+      setGenderData([]);
 
       const { table, totalField } = populationConfig[populationGroup];
 
-      let query = supabase
-        .from(table)
-        .select(`cocnum, ${totalField}`)
-        .eq("year", year);
-
-      if (state && state !== "") {
-        query = query.eq("state_name", state);
-      }
-
-      // --- BUILD COCNUM UNION (LEGACY + CURRENT) ---
+      // --- BUILD COCNUM UNION ONCE ---
       const cocnums = [];
 
       if (
@@ -92,20 +95,23 @@ export default function OverallDashboard({
         cocnums.push(...currentCocnums);
       }
 
+      // --- TOTAL QUERY ---
+      let query = supabase
+        .from(table)
+        .select(`cocnum, ${totalField}`)
+        .eq("year", year);
+
+      if (state && state !== "") {
+        query = query.eq("state_name", state);
+      }
+
       if (cocnums.length > 0) {
         query = query.in("cocnum", cocnums);
       }
 
       const { data, error } = await query;
 
-      if (error) {
-        console.error("Error fetching homeless metric:", error);
-        setHasData(false);
-        return;
-      }
-
-      // --- NO DATA CASES ---
-      if (!data || data.length === 0) {
+      if (error || !data || data.length === 0) {
         setHasData(false);
         return;
       }
@@ -119,13 +125,11 @@ export default function OverallDashboard({
         return;
       }
 
-      // --- TOTAL ---
-      const sum = data.reduce(
+      const total = data.reduce(
         (acc, row) => acc + (row[totalField] ?? 0),
         0
       );
 
-      // --- BREAKDOWN BY COCNUM ---
       const grouped = data.reduce((acc, row) => {
         if (!row.cocnum) return acc;
         acc[row.cocnum] =
@@ -133,13 +137,61 @@ export default function OverallDashboard({
         return acc;
       }, {});
 
-      const breakdownArr = Object.entries(grouped)
-        .map(([cocnum, value]) => ({ cocnum, value }))
-        .sort((a, b) => b.value - a.value);
-
       setHasData(true);
-      setTotalValue(sum);
-      setBreakdown(breakdownArr);
+      setTotalValue(total);
+      setBreakdown(
+        Object.entries(grouped)
+          .map(([cocnum, value]) => ({ cocnum, value }))
+          .sort((a, b) => b.value - a.value)
+      );
+
+      // --- GENDER DISTRIBUTION (ONLY FOR ALL PEOPLE) ---
+      if (populationGroup === "all") {
+        const genderFields = GENDER_FIELDS_OVERALL.map(g => g.field).join(",");
+
+        let genderQuery = supabase
+          .from("overall_homeless")
+          .select(genderFields)
+          .eq("year", year);
+
+        if (state && state !== "") {
+          genderQuery = genderQuery.eq("state_name", state);
+        }
+
+        if (cocnums.length > 0) {
+          genderQuery = genderQuery.in("cocnum", cocnums);
+        }
+
+        const { data: genderRows, error: genderError } = await genderQuery;
+
+        if (!genderError && genderRows?.length) {
+          const totals = {};
+          GENDER_FIELDS_OVERALL.forEach(({ field }) => {
+            totals[field] = 0;
+          });
+
+          genderRows.forEach(row => {
+            GENDER_FIELDS_OVERALL.forEach(({ field }) => {
+              totals[field] += row[field] ?? 0;
+            });
+          });
+
+          const formatted = GENDER_FIELDS_OVERALL
+            .map(({ field, label }) => ({
+              label,
+              value: totals[field],
+              percent:
+                total > 0
+                  ? Math.round((totals[field] / total) * 100)
+                  : 0
+            }))
+            .filter(d => d.value > 0 && d.percent > 0)
+            .sort((a, b) => b.value - a.value);
+
+          setGenderData(formatted);
+
+        }
+      }
     }
 
     fetchMetric();
@@ -153,13 +205,12 @@ export default function OverallDashboard({
 
   return (
     <div style={{ color: "white" }}>
-      {/* POPULATION SELECTOR */}
       <PopulationGroupSelector
         value={populationGroup}
         onChange={setPopulationGroup}
       />
 
-      {/* HEADER ROW */}
+      {/* HEADER */}
       <div
         style={{
           fontSize: "1.2rem",
@@ -175,17 +226,13 @@ export default function OverallDashboard({
         {hasData === null
           ? "Loading…"
           : hasData === false
-          ? "No data"
-          : totalValue.toLocaleString()}
+            ? "No data"
+            : totalValue.toLocaleString()}
 
-        {hasData && (
-          <span style={{ opacity: 0.7 }}>
-            {expanded ? "▾" : "▸"}
-          </span>
-        )}
+        {hasData && <span>{expanded ? "▾" : "▸"}</span>}
       </div>
 
-      {/* EXPANDABLE BREAKDOWN */}
+      {/* BREAKDOWN */}
       {expanded && breakdown.length > 0 && (
         <div
           style={{
@@ -211,6 +258,59 @@ export default function OverallDashboard({
             >
               <span>{row.cocnum}</span>
               <span>{row.value.toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* GENDER CHART */}
+      {populationGroup === "all" && genderData.length > 0 && (
+        <div
+          style={{
+            marginTop: "1rem",
+            maxWidth: "100%",
+            overflow: "hidden"
+          }}
+        >
+
+          <strong>Gender Distribution</strong>
+
+          {genderData.map(row => (
+            <div
+              key={row.label}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "minmax(90px, 140px) 1fr minmax(70px, 90px)",
+                gap: "8px",
+                alignItems: "center",
+                marginTop: "6px",
+                fontSize: "0.85rem"
+              }}
+            >
+              <span
+                style={{
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis"
+                }}
+              >
+                {row.label}
+              </span>
+
+              <div style={{ background: "#333", height: "10px", borderRadius: "4px" }}>
+                <div
+                  style={{
+                    width: `${row.percent}%`,
+                    height: "100%",
+                    background: "#cbb98b",
+                    borderRadius: "4px"
+                  }}
+                />
+              </div>
+              <span style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                {row.percent}% ({row.value.toLocaleString()})
+              </span>
+
             </div>
           ))}
         </div>
