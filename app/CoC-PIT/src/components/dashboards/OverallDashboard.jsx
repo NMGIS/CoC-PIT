@@ -203,6 +203,47 @@ const HISPANIC_RACE_FIELDS_FAMILIES = [
   { field: "a0533", label: "Multi-Racial" }
 ];
 
+// --- Veterans --- //
+// --- GENDER FIELDS — VETERANS ---
+const GENDER_FIELDS_VETERANS = [
+  { field: "a0720", label: "Women" },
+  { field: "a0721", label: "Men" },
+  { field: "a0722", label: "Transgender" },
+  { field: "a0723", label: "Gender Questioning" },
+  { field: "a0724", label: "Culturally Specific Identity" },
+  { field: "a0725", label: "Different Identity" },
+  { field: "a0726", label: "Non-Binary" },
+  { field: "a0727", label: "More Than One Gender" }
+];
+
+// Chart 1 — ETHNICITY (PRIMARY, EXCLUSIVE) — VETERANS
+const ETHNICITY_FIELDS_VETERANS = [
+  { field: "a0729", label: "Hispanic / Latina/e/o" },
+  { field: "a0728", label: "Non-Hispanic / Latina/e/o" }
+];
+
+// Chart 2 — SINGLE REPORTED IDENTITY — VETERANS
+const RACE_ONLY_FIELDS_VETERANS = [
+  { field: "a0738", label: "American Indian / Alaska Native" },
+  { field: "a0740", label: "Asian" },
+  { field: "a0742", label: "Black or African American" },
+  { field: "a0744", label: "Middle Eastern or North African" },
+  { field: "a0746", label: "Native Hawaiian or Other Pacific Islander" },
+  { field: "a0748", label: "White" },
+  { field: "a0750", label: "Multi-Racial" },
+  { field: "a0751", label: "Hispanic / Latina / e / o Only" }
+];
+
+// Chart 3 — RACE × ETHNICITY (HISPANIC SUBSET) — VETERANS
+const HISPANIC_RACE_FIELDS_VETERANS = [
+  { field: "a0737", label: "American Indian / Alaska Native" },
+  { field: "a0739", label: "Asian" },
+  { field: "a0741", label: "Black or African American" },
+  { field: "a0743", label: "Middle Eastern or North African" },
+  { field: "a0745", label: "Native Hawaiian or Other Pacific Islander" },
+  { field: "a0747", label: "White" },
+  { field: "a0749", label: "Multi-Racial" }
+];
 
 
 export default function OverallDashboard({
@@ -264,9 +305,12 @@ export default function OverallDashboard({
               ? `cocnum, ${totalField}, a0267`
               : populationGroup === "families"
                 ? `cocnum, ${totalField}, a0513`
-                : `cocnum, ${totalField}`
+                : populationGroup === "veterans"
+                  ? `cocnum, ${totalField}, a0729`
+                  : `cocnum, ${totalField}`
         )
         .eq("year", year);
+
 
 
       if (state) query = query.eq("state_name", state);
@@ -288,7 +332,10 @@ export default function OverallDashboard({
           ? data.reduce((sum, r) => sum + (r.a0267 || 0), 0)
           : populationGroup === "families"
             ? data.reduce((sum, r) => sum + (r.a0513 || 0), 0)
-            : data.reduce((sum, r) => sum + (r.a0021 || 0), 0);
+            : populationGroup === "veterans"
+              ? data.reduce((sum, r) => sum + (r.a0729 || 0), 0)
+              : data.reduce((sum, r) => sum + (r.a0021 || 0), 0);
+
 
 
       // --- BUILD COC BREAKDOWN ---
@@ -397,6 +444,36 @@ export default function OverallDashboard({
         );
       }
 
+      // -- Veterans distribution -- //
+      if (populationGroup === "veterans") {
+        await buildDistribution(
+          ETHNICITY_FIELDS_VETERANS,
+          total,
+          setEthnicityData,
+          table
+        );
+
+        await buildDistribution(
+          GENDER_FIELDS_VETERANS,
+          total,
+          setGenderData,
+          table
+        );
+
+        await buildDistribution(
+          RACE_ONLY_FIELDS_VETERANS,
+          total,
+          setRaceData,
+          table
+        );
+
+        await buildDistribution(
+          HISPANIC_RACE_FIELDS_VETERANS,
+          hispanicTotal,
+          setHispanicRaceData,
+          table
+        );
+      }
 
       async function buildDistribution(fields, total, setter, tableName) {
         if (!tableName) return; // optional guard
@@ -607,6 +684,23 @@ export default function OverallDashboard({
             "Race × Ethnicity (Hispanic Subset)",
             hispanicRaceData,
             "Subset of the Hispanic / Latina / e / o population, broken down by race."
+          )}
+        </>
+      )}
+
+      {populationGroup === "veterans" && (
+        <>
+          {renderChart("Gender Distribution", genderData)}
+          {renderChart("Ethnicity (Exclusive)", ethnicityData)}
+          {renderChart(
+            "Race (One Race Only)",
+            raceData,
+            "People who reported exactly one race or Hispanic / Latina / e / o identity only."
+          )}
+          {renderChart(
+            "Race × Ethnicity (Hispanic Subset)",
+            hispanicRaceData,
+            "Subset of the Hispanic / Latina / e / o veteran population, broken down by race."
           )}
         </>
       )}
