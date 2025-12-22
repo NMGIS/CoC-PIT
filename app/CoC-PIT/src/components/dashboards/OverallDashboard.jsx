@@ -68,15 +68,17 @@ const AGE_FIELDS_OVERALL = [
 ];
 
 // Chart 2 — RACE (INCLUSIVE, BASE RACE)
-const RACE_FIELDS_OVERALL = [
-  { field: "a0022", label: "American Indian / Alaska Native" },
-  { field: "a0023", label: "Asian" },
-  { field: "a0024", label: "Black" },
-  { field: "a0025", label: "Middle Eastern or North African" },
-  { field: "a0026", label: "Native Hawaiian or Other Pacific Islander" },
-  { field: "a0027", label: "White" },
-  { field: "a0028", label: "Multi-Racial" }
+const RACE_ONLY_FIELDS_OVERALL = [
+  { field: "a0030", label: "American Indian / Alaska Native" },
+  { field: "a0032", label: "Asian" },
+  { field: "a0034", label: "Black or African American" },
+  { field: "a0036", label: "Middle Eastern or North African" },
+  { field: "a0038", label: "Native Hawaiian or Other Pacific Islander" },
+  { field: "a0040", label: "White" },
+  { field: "a0042", label: "Multi-Racial" },
+  { field: "a0043", label: "Hispanic / Latina / e / o Only" }
 ];
+
 
 // Chart 3 — RACE × ETHNICITY (HISPANIC SUBSET)
 const HISPANIC_RACE_FIELDS = [
@@ -86,8 +88,7 @@ const HISPANIC_RACE_FIELDS = [
   { field: "a0035", label: "Middle Eastern or North African" },
   { field: "a0037", label: "Native Hawaiian or Other Pacific Islander" },
   { field: "a0039", label: "White" },
-  { field: "a0041", label: "Multi-Racial" },
-  { field: "a0043", label: "Hispanic / Latina / e / o Only" }
+  { field: "a0041", label: "Multi-Racial" }
 ];
 
 // Chart 1 — ETHNICITY (PRIMARY, EXCLUSIVE)
@@ -126,15 +127,16 @@ const ETHNICITY_FIELDS_INDIVIDUALS = [
   { field: "a0266", label: "Non-Hispanic / Latina/e/o" }
 ];
 
-// Chart 2 — RACE (INCLUSIVE, BASE RACE) — INDIVIDUALS
-const RACE_FIELDS_INDIVIDUALS = [
-  { field: "a0268", label: "American Indian / Alaska Native" },
-  { field: "a0269", label: "Asian" },
-  { field: "a0270", label: "Black" },
-  { field: "a0271", label: "Middle Eastern or North African" },
-  { field: "a0272", label: "Native Hawaiian or Other Pacific Islander" },
-  { field: "a0273", label: "White" },
-  { field: "a0274", label: "Multi-Racial" }
+// Chart 2 — SINGLE REPORTED IDENTITY (INDIVIDUALS)
+const RACE_ONLY_FIELDS_INDIVIDUALS = [
+  { field: "a0276", label: "American Indian / Alaska Native" },
+  { field: "a0278", label: "Asian" },
+  { field: "a0280", label: "Black or African American" },
+  { field: "a0282", label: "Middle Eastern or North African" },
+  { field: "a0284", label: "Native Hawaiian or Other Pacific Islander" },
+  { field: "a0286", label: "White" },
+  { field: "a0288", label: "Multi-Racial" },
+  { field: "a0289", label: "Hispanic / Latina / e / o Only" }
 ];
 
 // Chart 3 — RACE × ETHNICITY (HISPANIC SUBSET) — INDIVIDUALS
@@ -145,10 +147,61 @@ const HISPANIC_RACE_FIELDS_INDIVIDUALS = [
   { field: "a0281", label: "Middle Eastern or North African" },
   { field: "a0283", label: "Native Hawaiian or Other Pacific Islander" },
   { field: "a0285", label: "White" },
-  { field: "a0287", label: "Multi-Racial" },
-  { field: "a0289", label: "Hispanic / Latina / e / o Only" }
+  { field: "a0287", label: "Multi-Racial" }
 ];
 
+// --- PEOPLE IN FAMILIES --- //
+// --- GENDER FIELDS //
+const GENDER_FIELDS_FAMILIES = [
+  { field: "a0504", label: "Women" },
+  { field: "a0505", label: "Men" },
+  { field: "a0506", label: "Transgender" },
+  { field: "a0507", label: "Gender Questioning" },
+  { field: "a0508", label: "Culturally Specific Identity" },
+  { field: "a0509", label: "Different Identity" },
+  { field: "a0510", label: "Non-Binary" },
+  { field: "a0511", label: "More Than One Gender" }
+];
+
+// --- AGE FIELDS — PEOPLE IN FAMILIES (NO a0498) ---
+const AGE_FIELDS_FAMILIES = [
+  { field: "a0496", label: "Under 18" },
+  { field: "a0497", label: "Age 18–24" },
+  { field: "a0499", label: "Age 25–34" },
+  { field: "a0500", label: "Age 35–44" },
+  { field: "a0501", label: "Age 45–54" },
+  { field: "a0502", label: "Age 55–64" },
+  { field: "a0503", label: "Over 64" }
+];
+
+// Chart 1 — ETHNICITY (PRIMARY, EXCLUSIVE) — PEOPLE IN FAMILIES
+const ETHNICITY_FIELDS_FAMILIES = [
+  { field: "a0513", label: "Hispanic / Latina/e/o" },
+  { field: "a0512", label: "Non-Hispanic / Latina/e/o" }
+];
+
+// Chart 2 — SINGLE REPORTED IDENTITY — PEOPLE IN FAMILIES
+const RACE_ONLY_FIELDS_FAMILIES = [
+  { field: "a0522", label: "American Indian / Alaska Native" },
+  { field: "a0524", label: "Asian" },
+  { field: "a0526", label: "Black or African American" },
+  { field: "a0528", label: "Middle Eastern or North African" },
+  { field: "a0530", label: "Native Hawaiian or Other Pacific Islander" },
+  { field: "a0532", label: "White" },
+  { field: "a0534", label: "Multi-Racial" },
+  { field: "a0535", label: "Hispanic / Latina / e / o Only" }
+];
+
+// Chart 3 — RACE × ETHNICITY (HISPANIC SUBSET) — PEOPLE IN FAMILIES
+const HISPANIC_RACE_FIELDS_FAMILIES = [
+  { field: "a0521", label: "American Indian / Alaska Native" },
+  { field: "a0523", label: "Asian" },
+  { field: "a0525", label: "Black" },
+  { field: "a0527", label: "Middle Eastern or North African" },
+  { field: "a0529", label: "Native Hawaiian or Other Pacific Islander" },
+  { field: "a0531", label: "White" },
+  { field: "a0533", label: "Multi-Racial" }
+];
 
 
 
@@ -209,10 +262,11 @@ export default function OverallDashboard({
             ? `cocnum, ${totalField}, a0021`
             : populationGroup === "individuals"
               ? `cocnum, ${totalField}, a0267`
-              : `cocnum, ${totalField}`
+              : populationGroup === "families"
+                ? `cocnum, ${totalField}, a0513`
+                : `cocnum, ${totalField}`
         )
         .eq("year", year);
-
 
 
       if (state) query = query.eq("state_name", state);
@@ -232,9 +286,9 @@ export default function OverallDashboard({
       const hispanicTotal =
         populationGroup === "individuals"
           ? data.reduce((sum, r) => sum + (r.a0267 || 0), 0)
-          : data.reduce((sum, r) => sum + (r.a0021 || 0), 0);
-
-
+          : populationGroup === "families"
+            ? data.reduce((sum, r) => sum + (r.a0513 || 0), 0)
+            : data.reduce((sum, r) => sum + (r.a0021 || 0), 0);
 
 
       // --- BUILD COC BREAKDOWN ---
@@ -258,7 +312,7 @@ export default function OverallDashboard({
         await buildDistribution(ETHNICITY_FIELDS, total, setEthnicityData, table);
         await buildDistribution(GENDER_FIELDS_OVERALL, total, setGenderData, table);
         await buildDistribution(AGE_FIELDS_OVERALL, total, setAgeData, table);
-        await buildDistribution(RACE_FIELDS_OVERALL, total, setRaceData, table);
+        await buildDistribution(RACE_ONLY_FIELDS_OVERALL, total, setRaceData, table);
         await buildDistribution(
           HISPANIC_RACE_FIELDS,
           hispanicTotal,
@@ -291,7 +345,7 @@ export default function OverallDashboard({
         );
 
         await buildDistribution(
-          RACE_FIELDS_INDIVIDUALS,
+          RACE_ONLY_FIELDS_INDIVIDUALS,
           total,
           setRaceData,
           table
@@ -305,8 +359,43 @@ export default function OverallDashboard({
         );
       }
 
+      // -- People in Families distribution -- //
+      if (populationGroup === "families") {
+        await buildDistribution(
+          ETHNICITY_FIELDS_FAMILIES,
+          total,
+          setEthnicityData,
+          table
+        );
 
+        await buildDistribution(
+          GENDER_FIELDS_FAMILIES,
+          total,
+          setGenderData,
+          table
+        );
 
+        await buildDistribution(
+          AGE_FIELDS_FAMILIES,
+          total,
+          setAgeData,
+          table
+        );
+
+        await buildDistribution(
+          RACE_ONLY_FIELDS_FAMILIES,
+          total,
+          setRaceData,
+          table
+        );
+
+        await buildDistribution(
+          HISPANIC_RACE_FIELDS_FAMILIES,
+          hispanicTotal,
+          setHispanicRaceData,
+          table
+        );
+      }
 
 
       async function buildDistribution(fields, total, setter, tableName) {
@@ -475,8 +564,8 @@ export default function OverallDashboard({
           {renderChart("Gender Distribution", genderData)}
           {renderChart("Age Distribution", ageData)}
           {renderChart("Ethnicity (Exclusive)", ethnicityData)}
-          {renderChart("Race (Inclusive)", raceData,
-            "Race totals include people of Hispanic / Latina / e / o ethnicity."
+          {renderChart("Race (One Race Only)", raceData,
+            "People who reported exactly one race or Hispanic / Latina / e / o identity only."
           )}
           {renderChart(
             "Race × Ethnicity (Hispanic Subset)",
@@ -492,9 +581,9 @@ export default function OverallDashboard({
           {renderChart("Age Distribution", ageData)}
           {renderChart("Ethnicity (Exclusive)", ethnicityData)}
           {renderChart(
-            "Race (Inclusive)",
+            "Race (One Race Only)",
             raceData,
-            "Race totals include people of Hispanic / Latina / e / o ethnicity."
+            "People who reported exactly one race or Hispanic / Latina / e / o identity only."
           )}
           {renderChart(
             "Race × Ethnicity (Hispanic Subset)",
@@ -503,6 +592,25 @@ export default function OverallDashboard({
           )}
         </>
       )}
+
+      {populationGroup === "families" && (
+        <>
+          {renderChart("Gender Distribution", genderData)}
+          {renderChart("Age Distribution", ageData)}
+          {renderChart("Ethnicity (Exclusive)", ethnicityData)}
+          {renderChart(
+            "Race (One Race Only)",
+            raceData,
+            "People who reported exactly one race or Hispanic / Latina / e / o identity only."
+          )}
+          {renderChart(
+            "Race × Ethnicity (Hispanic Subset)",
+            hispanicRaceData,
+            "Subset of the Hispanic / Latina / e / o population, broken down by race."
+          )}
+        </>
+      )}
+
 
     </div>
   );
