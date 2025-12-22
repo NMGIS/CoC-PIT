@@ -245,6 +245,91 @@ const HISPANIC_RACE_FIELDS_VETERANS = [
   { field: "a0749", label: "Multi-Racial" }
 ];
 
+// -- Unaccompanied Youth Overall -- //
+// --- GENDER FIELDS — UNACCOMPANIED YOUTH (UNDER 25) ---
+const GENDER_FIELDS_UNACCOMPANIED_YOUTH = [
+  { field: "a0918", label: "Women" },
+  { field: "a0919", label: "Men" },
+  { field: "a0920", label: "Transgender" },
+  { field: "a0921", label: "Gender Questioning" },
+  { field: "a0922", label: "Culturally Specific Identity" },
+  { field: "a0923", label: "Different Identity" },
+  { field: "a0924", label: "Non-Binary" },
+  { field: "a0925", label: "More Than One Gender" }
+];
+
+// Chart 1 — ETHNICITY (EXCLUSIVE) — UNACCOMPANIED YOUTH (UNDER 25)
+const ETHNICITY_FIELDS_UNACCOMPANIED_YOUTH = [
+  { field: "a0927", label: "Hispanic / Latina/e/o" },
+  { field: "a0926", label: "Non-Hispanic / Latina/e/o" }
+];
+
+// Chart 2 — SINGLE REPORTED IDENTITY — UNACCOMPANIED YOUTH (UNDER 25)
+const RACE_ONLY_FIELDS_UNACCOMPANIED_YOUTH = [
+  { field: "a0936", label: "American Indian / Alaska Native" },
+  { field: "a0938", label: "Asian" },
+  { field: "a0940", label: "Black or African American" },
+  { field: "a0942", label: "Middle Eastern or North African" },
+  { field: "a0944", label: "Native Hawaiian or Other Pacific Islander" },
+  { field: "a0946", label: "White" },
+  { field: "a0948", label: "Multi-Racial" },
+  { field: "a0949", label: "Hispanic / Latina / e / o Only" }
+];
+
+// UNACCOMPANIED YOUTH (UNDER 25)
+const HISPANIC_RACE_FIELDS_UNACCOMPANIED_YOUTH = [
+  { field: "a0935", label: "American Indian / Alaska Native" },
+  { field: "a0937", label: "Asian" },
+  { field: "a0939", label: "Black or African American" },
+  { field: "a0941", label: "Middle Eastern or North African" },
+  { field: "a0943", label: "Native Hawaiian or Other Pacific Islander" },
+  { field: "a0945", label: "White" },
+  { field: "a0947", label: "Multi-Racial" }
+];
+
+// -- Parenting Youth -- //
+// --- GENDER FIELDS — PARENTING YOUTH (UNDER 25) ---
+const GENDER_FIELDS_PARENTING_YOUTH = [
+  { field: "a1128", label: "Women" },
+  { field: "a1129", label: "Men" },
+  { field: "a1130", label: "Transgender" },
+  { field: "a1131", label: "Gender Questioning" },
+  { field: "a1132", label: "Culturally Specific Identity" },
+  { field: "a1133", label: "Different Identity" },
+  { field: "a1134", label: "Non-Binary" },
+  { field: "a1135", label: "More Than One Gender" }
+];
+
+// Chart 1 — ETHNICITY (EXCLUSIVE) — PARENTING YOUTH (UNDER 25)
+const ETHNICITY_FIELDS_PARENTING_YOUTH = [
+  { field: "a1137", label: "Hispanic / Latina/e/o" },
+  { field: "a1136", label: "Non-Hispanic / Latina/e/o" }
+];
+
+// Chart 2 — SINGLE REPORTED IDENTITY
+// PARENTING YOUTH (UNDER 25)
+const RACE_ONLY_FIELDS_PARENTING_YOUTH = [
+  { field: "a1146", label: "American Indian / Alaska Native" },
+  { field: "a1148", label: "Asian" },
+  { field: "a1150", label: "Black or African American" },
+  { field: "a1152", label: "Middle Eastern or North African" },
+  { field: "a1154", label: "Native Hawaiian or Other Pacific Islander" },
+  { field: "a1156", label: "White" },
+  { field: "a1158", label: "Multi-Racial" },
+  { field: "a1159", label: "Hispanic / Latina / e / o Only" }
+];
+
+// Chart 3 — RACE × ETHNICITY (HISPANIC SUBSET)
+const HISPANIC_RACE_FIELDS_PARENTING_YOUTH = [
+  { field: "a1145", label: "American Indian / Alaska Native" },
+  { field: "a1147", label: "Asian" },
+  { field: "a1149", label: "Black or African American" },
+  { field: "a1151", label: "Middle Eastern or North African" },
+  { field: "a1153", label: "Native Hawaiian or Other Pacific Islander" },
+  { field: "a1155", label: "White" },
+  { field: "a1157", label: "Multi-Racial" }
+];
+
 
 export default function OverallDashboard({
   year,
@@ -307,7 +392,11 @@ export default function OverallDashboard({
                 ? `cocnum, ${totalField}, a0513`
                 : populationGroup === "veterans"
                   ? `cocnum, ${totalField}, a0729`
-                  : `cocnum, ${totalField}`
+                  : populationGroup === "unaccompanied_youth"
+                    ? `cocnum, ${totalField}, a0927`
+                    : populationGroup === "parenting_youth"
+                      ? `cocnum, ${totalField}, a1137`
+                      : `cocnum, ${totalField}`
         )
         .eq("year", year);
 
@@ -334,7 +423,11 @@ export default function OverallDashboard({
             ? data.reduce((sum, r) => sum + (r.a0513 || 0), 0)
             : populationGroup === "veterans"
               ? data.reduce((sum, r) => sum + (r.a0729 || 0), 0)
-              : data.reduce((sum, r) => sum + (r.a0021 || 0), 0);
+              : populationGroup === "unaccompanied_youth"
+                ? data.reduce((sum, r) => sum + (r.a0927 || 0), 0)
+                : populationGroup === "parenting_youth"
+                  ? data.reduce((sum, r) => sum + (r.a1137 || 0), 0)
+                  : data.reduce((sum, r) => sum + (r.a0021 || 0), 0);
 
 
 
@@ -474,6 +567,70 @@ export default function OverallDashboard({
           table
         );
       }
+
+      // -- Unaccompanied Youth distribution -- //
+      if (populationGroup === "unaccompanied_youth") {
+        await buildDistribution(
+          ETHNICITY_FIELDS_UNACCOMPANIED_YOUTH,
+          total,
+          setEthnicityData,
+          table
+        );
+
+        await buildDistribution(
+          GENDER_FIELDS_UNACCOMPANIED_YOUTH,
+          total,
+          setGenderData,
+          table
+        );
+
+        await buildDistribution(
+          RACE_ONLY_FIELDS_UNACCOMPANIED_YOUTH,
+          total,
+          setRaceData,
+          table
+        );
+
+        await buildDistribution(
+          HISPANIC_RACE_FIELDS_UNACCOMPANIED_YOUTH,
+          hispanicTotal,
+          setHispanicRaceData,
+          table
+        );
+      }
+
+      // -- Parenting Youth distribution -- //
+      if (populationGroup === "parenting_youth") {
+        await buildDistribution(
+          ETHNICITY_FIELDS_PARENTING_YOUTH,
+          total,
+          setEthnicityData,
+          table
+        );
+
+        await buildDistribution(
+          GENDER_FIELDS_PARENTING_YOUTH,
+          total,
+          setGenderData,
+          table
+        );
+
+        await buildDistribution(
+          RACE_ONLY_FIELDS_PARENTING_YOUTH,
+          total,
+          setRaceData,
+          table
+        );
+
+        await buildDistribution(
+          HISPANIC_RACE_FIELDS_PARENTING_YOUTH,
+          hispanicTotal,
+          setHispanicRaceData,
+          table
+        );
+      }
+
+
 
       async function buildDistribution(fields, total, setter, tableName) {
         if (!tableName) return; // optional guard
@@ -700,7 +857,41 @@ export default function OverallDashboard({
           {renderChart(
             "Race × Ethnicity (Hispanic Subset)",
             hispanicRaceData,
-            "Subset of the Hispanic / Latina / e / o veteran population, broken down by race."
+            "Subset of the Hispanic / Latina / e / o population, broken down by race."
+          )}
+        </>
+      )}
+
+      {populationGroup === "unaccompanied_youth" && (
+        <>
+          {renderChart("Gender Distribution", genderData)}
+          {renderChart("Ethnicity (Exclusive)", ethnicityData)}
+          {renderChart(
+            "Race (One Race Only)",
+            raceData,
+            "People who reported exactly one race or Hispanic / Latina / e / o identity only."
+          )}
+          {renderChart(
+            "Race × Ethnicity (Hispanic Subset)",
+            hispanicRaceData,
+            "Subset of the Hispanic / Latina / e / o population, broken down by race."
+          )}
+        </>
+      )}
+
+      {populationGroup === "parenting_youth" && (
+        <>
+          {renderChart("Gender Distribution", genderData)}
+          {renderChart("Ethnicity (Exclusive)", ethnicityData)}
+          {renderChart(
+            "Race (One Race Only)",
+            raceData,
+            "People who reported exactly one race or Hispanic / Latina / e / o identity only."
+          )}
+          {renderChart(
+            "Race × Ethnicity (Hispanic Subset)",
+            hispanicRaceData,
+            "Subset of the Hispanic / Latina / e / o parenting youth population, broken down by race."
           )}
         </>
       )}
