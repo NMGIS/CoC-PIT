@@ -323,3 +323,573 @@ const HISPANIC_RACE_FIELDS_SHELTERED_PARENTING_YOUTH = [
   { field: "a1254", label: "White" },
   { field: "a1256", label: "Multi-Racial" }
 ];
+
+export default function ShelteredTotalDashboard({
+  year,
+  state,
+  currentCocnums,
+  legacyCocnums
+}) {
+  const [populationGroup, setPopulationGroup] = useState("all");
+  const [totalValue, setTotalValue] = useState(null);
+  const [hasData, setHasData] = useState(null);
+  const [breakdown, setBreakdown] = useState([]);
+  const [expanded, setExpanded] = useState(false);
+
+  const [genderData, setGenderData] = useState([]);
+  const [ageData, setAgeData] = useState([]);
+  const [raceData, setRaceData] = useState([]);
+  const [ethnicityData, setEthnicityData] = useState([]);
+  const [hispanicRaceData, setHispanicRaceData] = useState([]);
+
+
+  useEffect(() => {
+    async function fetchMetric() {
+      setTotalValue(null);
+      setHasData(null);
+      setBreakdown([]);
+      setExpanded(false);
+      setGenderData([]);
+      setAgeData([]);
+      setRaceData([]);
+      setEthnicityData([]);
+      setHispanicRaceData([]);
+
+
+      const { table, totalField } = populationConfig[populationGroup];
+
+      // --- BUILD COCNUM UNION ---
+      const cocnums = [];
+
+      if (
+        Array.isArray(legacyCocnums) &&
+        legacyCocnums.length > 0 &&
+        !legacyCocnums.includes("NONE")
+      ) {
+        cocnums.push(...legacyCocnums);
+      }
+
+      if (Array.isArray(currentCocnums) && currentCocnums.length > 0) {
+        cocnums.push(...currentCocnums);
+      }
+
+      // --- TOTAL QUERY ---
+      let query = supabase
+        .from(table)
+        .select(
+          populationGroup === "all"
+            ? `cocnum, ${totalField}, a0185`
+            : populationGroup === "individuals"
+              ? `cocnum, ${totalField}, a0431`
+              : populationGroup === "families"
+                ? `cocnum, ${totalField}, a0636`
+                : populationGroup === "veterans"
+                  ? `cocnum, ${totalField}, a0861`
+                  : populationGroup === "unaccompanied_youth"
+                    ? `cocnum, ${totalField}, a1059`
+                    : populationGroup === "parenting_youth"
+                      ? `cocnum, ${totalField}, a1236`
+                      : `cocnum, ${totalField}`
+        )
+        .eq("year", year);
+
+
+
+      if (state) query = query.eq("state_name", state);
+      if (cocnums.length) query = query.in("cocnum", cocnums);
+
+      const { data, error } = await query;
+      if (error || !data?.length) {
+        setHasData(false);
+        return;
+      }
+
+      const total = data.reduce(
+        (acc, row) => acc + (row[totalField] ?? 0),
+        0
+      );
+
+      const hispanicTotal =
+        populationGroup === "individuals"
+          ? data.reduce((sum, r) => sum + (r.a0431 || 0), 0)
+          : populationGroup === "families"
+            ? data.reduce((sum, r) => sum + (r.a0636 || 0), 0)
+            : populationGroup === "veterans"
+              ? data.reduce((sum, r) => sum + (r.a0861 || 0), 0)
+              : populationGroup === "unaccompanied_youth"
+                ? data.reduce((sum, r) => sum + (r.a1059 || 0), 0)
+                : populationGroup === "parenting_youth"
+                  ? data.reduce((sum, r) => sum + (r.a1236 || 0), 0)
+                  : data.reduce((sum, r) => sum + (r.a0185 || 0), 0);
+
+
+
+      // --- BUILD COC BREAKDOWN ---
+      const grouped = data.reduce((acc, row) => {
+        if (!row.cocnum) return acc;
+        acc[row.cocnum] = (acc[row.cocnum] || 0) + (row[totalField] ?? 0);
+        return acc;
+      }, {});
+
+      setBreakdown(
+        Object.entries(grouped)
+          .map(([cocnum, value]) => ({ cocnum, value }))
+          .sort((a, b) => b.value - a.value)
+      );
+
+      setHasData(true);
+      setTotalValue(total);
+
+      // --- Overall Homeless DISTRIBUTIONS (ALL PEOPLE ONLY) ---
+      if (populationGroup === "all") {
+        await buildDistribution(ETHNICITY_FIELDS_SHELTERED, total, setEthnicityData, table);
+        await buildDistribution(shelteredGenderFields, total, setGenderData, table);
+        await buildDistribution(shelteredAgeFields, total, setAgeData, table);
+        await buildDistribution(RACE_ONLY_FIELDS_SHELTERED, total, setRaceData, table);
+        await buildDistribution(
+          RACE_X_ETHNICITY_HISPANIC_SUFFIX_FIELDS_SHELTERED,
+          hispanicTotal,
+          setHispanicRaceData,
+          table
+        );
+      }
+
+      // -- Individuals distribution -- //
+      if (populationGroup === "individuals") {
+        await buildDistribution(
+          ETHNICITY_FIELDS_SHELTERED_INDIVIDUALS,
+          total,
+          setEthnicityData,
+          table
+        );
+
+        await buildDistribution(
+          GENDER_FIELDS_SHELTERED_INDIVIDUALS,
+          total,
+          setGenderData,
+          table
+        );
+
+        await buildDistribution(
+          AGE_FIELDS_SHELTERED_INDIVIDUALS,
+          total,
+          setAgeData,
+          table
+        );
+
+        await buildDistribution(
+          RACE_ONLY_FIELDS_SHELTERED_INDIVIDUALS,
+          total,
+          setRaceData,
+          table
+        );
+
+        await buildDistribution(
+          HISPANIC_RACE_FIELDS_SHELTERED_INDIVIDUALS,
+          hispanicTotal,
+          setHispanicRaceData,
+          table
+        );
+      }
+
+      // -- People in Families distribution -- //
+      if (populationGroup === "families") {
+        await buildDistribution(
+          ETHNICITY_FIELDS_SHELTERED_FAMILIES,
+          total,
+          setEthnicityData,
+          table
+        );
+
+        await buildDistribution(
+          GENDER_FIELDS_SHELTERED_FAMILIES,
+          total,
+          setGenderData,
+          table
+        );
+
+        await buildDistribution(
+          AGE_FIELDS_SHELTERED_FAMILIES,
+          total,
+          setAgeData,
+          table
+        );
+
+        await buildDistribution(
+          RACE_ONLY_FIELDS_SHELTERED_FAMILIES,
+          total,
+          setRaceData,
+          table
+        );
+
+        await buildDistribution(
+          HISPANIC_RACE_FIELDS_SHELTERED_FAMILIES,
+          hispanicTotal,
+          setHispanicRaceData,
+          table
+        );
+      }
+
+      // -- Veterans distribution -- //
+      if (populationGroup === "veterans") {
+        await buildDistribution(
+          ETHNICITY_FIELDS_SHELTERED_VETERANS,
+          total,
+          setEthnicityData,
+          table
+        );
+
+        await buildDistribution(
+          GENDER_FIELDS_SHELTERED_VETERANS,
+          total,
+          setGenderData,
+          table
+        );
+
+        await buildDistribution(
+          RACE_ONLY_FIELDS_SHELTERED_VETERANS,
+          total,
+          setRaceData,
+          table
+        );
+
+        await buildDistribution(
+          HISPANIC_RACE_FIELDS_SHELTERED_VETERANS,
+          hispanicTotal,
+          setHispanicRaceData,
+          table
+        );
+      }
+
+      // -- Unaccompanied Youth distribution -- //
+      if (populationGroup === "unaccompanied_youth") {
+        await buildDistribution(
+          ETHNICITY_FIELDS_SHELTERED_UNACCOMPANIED_YOUTH,
+          total,
+          setEthnicityData,
+          table
+        );
+
+        await buildDistribution(
+          GENDER_FIELDS_SHELTERED_UNACCOMPANIED_YOUTH,
+          total,
+          setGenderData,
+          table
+        );
+
+        await buildDistribution(
+          RACE_ONLY_FIELDS_SHELTERED_UNACCOMPANIED_YOUTH,
+          total,
+          setRaceData,
+          table
+        );
+
+        await buildDistribution(
+          HISPANIC_RACE_FIELDS_SHELTERED_UNACCOMPANIED_YOUTH,
+          hispanicTotal,
+          setHispanicRaceData,
+          table
+        );
+      }
+
+      // -- Parenting Youth distribution -- //
+      if (populationGroup === "parenting_youth") {
+        await buildDistribution(
+          ETHNICITY_FIELDS_SHELTERED_PARENTING_YOUTH,
+          total,
+          setEthnicityData,
+          table
+        );
+
+        await buildDistribution(
+          GENDER_FIELDS_SHELTERED_PARENTING_YOUTH,
+          total,
+          setGenderData,
+          table
+        );
+
+        await buildDistribution(
+          RACE_ONLY_FIELDS_SHELTERED_PARENTING_YOUTH,
+          total,
+          setRaceData,
+          table
+        );
+
+        await buildDistribution(
+          HISPANIC_RACE_FIELDS_SHELTERED_PARENTING_YOUTH,
+          hispanicTotal,
+          setHispanicRaceData,
+          table
+        );
+      }
+
+
+
+      async function buildDistribution(fields, total, setter, tableName) {
+        if (!tableName) return; // optional guard
+
+
+        const selectFields = fields.map(f => f.field).join(",");
+
+        let q = supabase
+          .from(tableName)
+          .select(selectFields)
+          .eq("year", year);
+
+        if (state) q = q.eq("state_name", state);
+        if (cocnums.length) q = q.in("cocnum", cocnums);
+
+        const { data } = await q;
+        if (!data?.length) return;
+
+        const totals = {};
+        fields.forEach(f => (totals[f.field] = 0));
+
+        data.forEach(row => {
+          fields.forEach(f => {
+            totals[f.field] += row[f.field] ?? 0;
+          });
+        });
+
+        setter(
+          fields
+            .map(f => ({
+              label: f.label,
+              value: totals[f.field],
+              percent: total > 0
+                ? Math.round((totals[f.field] / total) * 100)
+                : 0
+            }))
+            .filter(d => d.value > 0 && d.percent > 0)
+            .sort((a, b) => b.value - a.value)
+        );
+      }
+
+    }
+
+    fetchMetric();
+  }, [year, state, currentCocnums, legacyCocnums, populationGroup]);
+
+  const renderChart = (title, data, subtitle) =>
+    data.length > 0 && (
+      <div style={{ marginTop: "1.25rem", maxWidth: "100%" }}>
+        <strong>{title}</strong>
+        {subtitle && (
+          <div style={{ fontSize: "0.8rem", opacity: 0.85, marginTop: "4px" }}>
+            {subtitle}
+          </div>
+        )}
+        {data.map(row => (
+          <div
+            key={row.label}
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "minmax(90px, 160px) 1fr minmax(90px, 110px)",
+              gap: "8px",
+              alignItems: "center",
+              marginTop: "6px",
+              fontSize: "0.85rem"
+            }}
+          >
+            <span
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                cursor: "help"
+              }}
+              title={row.label}
+            >
+              {row.label}
+            </span>
+
+
+            <div style={{ background: "#333", height: "10px", borderRadius: "4px" }}>
+              <div
+                style={{
+                  width: `${row.percent}%`,
+                  height: "100%",
+                  background: "#cbb98b",
+                  borderRadius: "4px"
+                }}
+              />
+            </div>
+
+            <span style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+              {row.percent}% ({row.value.toLocaleString()})
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+
+  return (
+    <div style={{ color: "white" }}>
+      <PopulationGroupSelector
+        value={populationGroup}
+        onChange={setPopulationGroup}
+      />
+
+      {/* HEADER WITH EXPAND */}
+      <div
+        style={{
+          fontSize: "1.2rem",
+          marginTop: "0.5rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+          cursor: hasData ? "pointer" : "default"
+        }}
+        onClick={() => hasData && setExpanded(v => !v)}
+      >
+        <strong>{populationLabels[populationGroup]}:</strong>
+
+        {hasData === null
+          ? "Loading…"
+          : hasData === false
+            ? "No data"
+            : totalValue.toLocaleString()}
+
+        {hasData && <span>{expanded ? "▾" : "▸"}</span>}
+      </div>
+
+      {/* COC BREAKDOWN */}
+      {expanded && breakdown.length > 0 && (
+        <div
+          style={{
+            marginTop: "0.5rem",
+            background: "#2b2b2b",
+            border: "1px solid #444",
+            borderRadius: "4px",
+            padding: "0.5rem",
+            maxHeight: "200px",
+            overflowY: "auto",
+            fontSize: "0.9rem"
+          }}
+        >
+          {breakdown.map(row => (
+            <div
+              key={row.cocnum}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "4px 0",
+                borderBottom: "1px solid #333"
+              }}
+            >
+              <span>{row.cocnum}</span>
+              <span>{row.value.toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* DISTRIBUTIONS */}
+      {populationGroup === "all" && (
+        <>
+          {renderChart("Gender Distribution", genderData)}
+          {renderChart("Age Distribution", ageData)}
+          {renderChart("Ethnicity (Exclusive)", ethnicityData)}
+          {renderChart("Race (One Race Only)", raceData,
+            "People who reported exactly one race or Hispanic / Latina / e / o identity only."
+          )}
+          {renderChart(
+            "Race × Ethnicity (Hispanic Subset)",
+            hispanicRaceData,
+            "Subset of the Hispanic / Latina / e / o population, broken down by race."
+          )}
+        </>
+      )}
+
+      {populationGroup === "individuals" && (
+        <>
+          {renderChart("Gender Distribution", genderData)}
+          {renderChart("Age Distribution", ageData)}
+          {renderChart("Ethnicity (Exclusive)", ethnicityData)}
+          {renderChart(
+            "Race (One Race Only)",
+            raceData,
+            "People who reported exactly one race or Hispanic / Latina / e / o identity only."
+          )}
+          {renderChart(
+            "Race × Ethnicity (Hispanic Subset)",
+            hispanicRaceData,
+            "Subset of the Hispanic / Latina / e / o population, broken down by race."
+          )}
+        </>
+      )}
+
+      {populationGroup === "families" && (
+        <>
+          {renderChart("Gender Distribution", genderData)}
+          {renderChart("Age Distribution", ageData)}
+          {renderChart("Ethnicity (Exclusive)", ethnicityData)}
+          {renderChart(
+            "Race (One Race Only)",
+            raceData,
+            "People who reported exactly one race or Hispanic / Latina / e / o identity only."
+          )}
+          {renderChart(
+            "Race × Ethnicity (Hispanic Subset)",
+            hispanicRaceData,
+            "Subset of the Hispanic / Latina / e / o population, broken down by race."
+          )}
+        </>
+      )}
+
+      {populationGroup === "veterans" && (
+        <>
+          {renderChart("Gender Distribution", genderData)}
+          {renderChart("Ethnicity (Exclusive)", ethnicityData)}
+          {renderChart(
+            "Race (One Race Only)",
+            raceData,
+            "People who reported exactly one race or Hispanic / Latina / e / o identity only."
+          )}
+          {renderChart(
+            "Race × Ethnicity (Hispanic Subset)",
+            hispanicRaceData,
+            "Subset of the Hispanic / Latina / e / o population, broken down by race."
+          )}
+        </>
+      )}
+
+      {populationGroup === "unaccompanied_youth" && (
+        <>
+          {renderChart("Gender Distribution", genderData)}
+          {renderChart("Ethnicity (Exclusive)", ethnicityData)}
+          {renderChart(
+            "Race (One Race Only)",
+            raceData,
+            "People who reported exactly one race or Hispanic / Latina / e / o identity only."
+          )}
+          {renderChart(
+            "Race × Ethnicity (Hispanic Subset)",
+            hispanicRaceData,
+            "Subset of the Hispanic / Latina / e / o population, broken down by race."
+          )}
+        </>
+      )}
+
+      {populationGroup === "parenting_youth" && (
+        <>
+          {renderChart("Gender Distribution", genderData)}
+          {renderChart("Ethnicity (Exclusive)", ethnicityData)}
+          {renderChart(
+            "Race (One Race Only)",
+            raceData,
+            "People who reported exactly one race or Hispanic / Latina / e / o identity only."
+          )}
+          {renderChart(
+            "Race × Ethnicity (Hispanic Subset)",
+            hispanicRaceData,
+            "Subset of the Hispanic / Latina / e / o parenting youth population, broken down by race."
+          )}
+        </>
+      )}
+
+
+    </div>
+  );
+}
