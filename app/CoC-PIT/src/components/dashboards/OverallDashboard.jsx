@@ -67,7 +67,13 @@ const AGE_FIELDS_OVERALL = [
   { field: "a0011", label: "Over 64" }
 ];
 
-// Chart 2 — RACE (INCLUSIVE, BASE RACE)
+// Chart 1 — ETHNICITY (PRIMARY, EXCLUSIVE)
+const ETHNICITY_FIELDS = [
+  { field: "a0021", label: "Hispanic / Latina/e/o" },
+  { field: "a0020", label: "Non-Hispanic / Latina/e/o" }
+];
+
+// Chart 2 — RACE (Only)
 const RACE_ONLY_FIELDS_OVERALL = [
   { field: "a0030", label: "American Indian / Alaska Native" },
   { field: "a0032", label: "Asian" },
@@ -89,12 +95,6 @@ const HISPANIC_RACE_FIELDS = [
   { field: "a0037", label: "Native Hawaiian or Other Pacific Islander" },
   { field: "a0039", label: "White" },
   { field: "a0041", label: "Multi-Racial" }
-];
-
-// Chart 1 — ETHNICITY (PRIMARY, EXCLUSIVE)
-const ETHNICITY_FIELDS = [
-  { field: "a0021", label: "Hispanic / Latina/e/o" },
-  { field: "a0020", label: "Non-Hispanic / Latina/e/o" }
 ];
 
 // --- Overall Homeless Idividuals Group -- //
