@@ -5,7 +5,7 @@ import Layout from "./components/Layout";
 import StateFilter from "./components/StateFilter";
 import CocnumFilter from "./components/COCNUMFilter";
 import YearFilter from "./components/YearFilter";
-import HomelessGroupFilter from "./components/HomelessGroupFilter";  // NEW
+import HomelessGroupFilter from "./components/HomelessGroupFilter";
 import "./App.css";
 import OverallDashboard from "./components/dashboards/OverallDashboard";
 import ShelteredESDashboard from "./components/dashboards/ShelteredESDashboard";
@@ -386,18 +386,24 @@ export default function App() {
             populationGroup={populationGroup}
           />
         );
-
       case "Sheltered ES Homeless":
-      return (
-        <ShelteredESDashboard
-          year={selectedYear}
-          state={selectedState}
-          currentCocnums={selectedCurrentCocnums}
-          legacyCocnums={selectedLegacyCocnums}
-        />
-      );
+        return (
+          <ShelteredESDashboard
+            year={selectedYear}
+            state={selectedState}
+            currentCocnums={selectedCurrentCocnums}
+            legacyCocnums={selectedLegacyCocnums}
+          />
+        );
       case "Sheltered SH Homeless":
-        return <ShelteredSHDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
+        return (
+          <ShelteredSHDashboard
+            year={selectedYear}
+            state={selectedState}
+            currentCocnums={selectedCurrentCocnums}
+            legacyCocnums={selectedLegacyCocnums}
+          />
+        );
       case "Sheltered TH Homeless":
         return <ShelteredTHDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
       case "Sheltered Total Homeless":

@@ -1,4 +1,8 @@
-export default function PopulationGroupSelector({ value, onChange }) {
+export default function PopulationGroupSelector({
+  value,
+  onChange,
+  allowedGroups
+}) {
   const options = [
     { id: "all", label: "All People" },
     { id: "individuals", label: "Individuals" },
@@ -8,21 +12,18 @@ export default function PopulationGroupSelector({ value, onChange }) {
     { id: "parenting_youth", label: "Parenting Youth (<25)" }
   ];
 
+  const filteredOptions = allowedGroups
+    ? options.filter(opt => allowedGroups.includes(opt.id))
+    : options;
+
   return (
     <div style={{ marginBottom: "0.75rem" }}>
       <div style={{ fontSize: "0.9rem", marginBottom: "0.25rem", opacity: 0.8 }}>
-        Overall Homeless Group
+        Population Group
       </div>
 
-      {options.map(opt => (
-        <label
-          key={opt.id}
-          style={{
-            display: "block",
-            cursor: "pointer",
-            marginBottom: "4px"
-          }}
-        >
+      {filteredOptions.map(opt => (
+        <label key={opt.id} style={{ display: "block", cursor: "pointer" }}>
           <input
             type="radio"
             name="population"
