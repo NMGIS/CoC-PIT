@@ -405,7 +405,14 @@ export default function App() {
           />
         );
       case "Sheltered TH Homeless":
-        return <ShelteredTHDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
+        return (
+          <ShelteredTHDashboard
+            year={selectedYear}
+            state={selectedState}
+            currentCocnums={selectedCurrentCocnums}
+            legacyCocnums={selectedLegacyCocnums}
+          />
+        );
       case "Sheltered Total Homeless":
         return (
           <ShelteredTotalDashboard
