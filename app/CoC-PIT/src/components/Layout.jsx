@@ -4,7 +4,7 @@ export default function Layout({ top, left, map }) {
       style={{
         display: "grid",
         gridTemplateColumns: "1fr 1fr",  // left | map
-        gridTemplateRows: "15% 1fr",      // top filter bar | main area
+        gridTemplateRows: "auto 1fr",
         height: "100vh",
         width: "100vw",
         overflow: "hidden",
