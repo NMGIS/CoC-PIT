@@ -1,4 +1,4 @@
-export default function Layout({ top, left, map }) {
+export default function Layout({ top, left, map, onInfoClick }) {
   return (
     <div
       style={{
@@ -23,7 +23,30 @@ export default function Layout({ top, left, map }) {
           borderBottom: "1px solid #333",
         }}
       >
-        {top}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            width: "100%"
+          }}
+        >
+          {/* LEFT: filters */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            {top}
+          </div>
+
+          {/* RIGHT: info button */}
+          <div style={{ marginLeft: "auto" }}>
+            <button
+              id="info-button"
+              aria-label="About this dashboard"
+              onClick={onInfoClick}
+            >
+              ⓘ
+            </button>
+          </div>
+        </div>
+
       </div>
 
       {/* LEFT PANEL */}

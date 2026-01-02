@@ -18,6 +18,7 @@ import UnshelteredDashboard from "./components/dashboards/UnshelteredDashboard";
 export default function App() {
   // ---- FILTER STATES ----
   const [selectedState, setSelectedState] = useState("");
+  const [showInfo, setShowInfo] = useState(false);
   const cocList = [
     "AK-500", "AK-501",
     "AL-500", "AL-501", "AL-502", "AL-503", "AL-504", "AL-505", "AL-506", "AL-507", "AL-508",
@@ -497,74 +498,156 @@ export default function App() {
   };
 
 
-
   return (
-    <Layout
-      top={
-        <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-          {/* RESET BUTTON */}
-          <button
-            onClick={handleReset}
+    <>
+      <Layout
+        top={
+          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+            {/* RESET BUTTON */}
+            <button
+              onClick={handleReset}
+              style={{
+                padding: "6px 10px",
+                background: "#444",
+                color: "white",
+                border: "1px solid #666",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
+            >
+              Reset Filters
+            </button>
+
+            <HomelessGroupFilter
+              value={selectedGroup}
+              onChange={setSelectedGroup}
+            />
+
+            <YearFilter
+              value={selectedYear}
+              onChange={setSelectedYear}
+            />
+
+            <StateFilter
+              value={selectedState}
+              onChange={(state) => handleStateChange(state)}
+            />
+
+            <CocnumFilter
+              type="current"
+              value={selectedCurrentCocnums}
+              onChange={setSelectedCurrentCocnums}
+              cocnums={filteredCurrentList}
+            />
+
+            <CocnumFilter
+              type="legacy"
+              label="Legacy COCNUM"
+              value={selectedLegacyCocnums}
+              onChange={setSelectedLegacyCocnums}
+              cocnums={filteredLegacyList}
+              labelMap={legacyLabelMap}
+              includeNoneOption={true}
+            />
+          </div>
+        }
+        left={renderDashboard()}
+        map={
+          <MapViewComponent
+            selectedState={selectedState}
+            selectedCurrent={selectedCurrentCocnums}
+            selectedLegacy={selectedLegacyCocnums}
+          />
+        }
+        onInfoClick={() => setShowInfo(true)}
+      />
+
+      {/* 👇 INFO MODAL GOES HERE 👇 */}
+      {showInfo && (
+        <div
+          onClick={() => setShowInfo(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.6)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
             style={{
-              padding: "6px 10px",
-              background: "#444",
+              background: "#2b2b2b",
               color: "white",
-              border: "1px solid #666",
-              borderRadius: "4px",
-              cursor: "pointer",
+              padding: "1rem 1.25rem",
+              borderRadius: "6px",
+              maxWidth: "520px",
+              width: "90%",
+              border: "1px solid #444",
             }}
           >
-            Reset Filters
-          </button>
+            <div style={{ fontSize: "1.1rem", marginBottom: "0.5rem" }}>
+              About this dashboard
+            </div>
 
-          <HomelessGroupFilter
-            value={selectedGroup}
-            onChange={setSelectedGroup}
-          />
+            <p style={{ fontSize: "0.9rem", lineHeight: 1.5, opacity: 0.9 }}>
+              This application visualizes U.S. Continuum of Care (CoC) Point-in-Time (PIT) homelessness
+              data by year, population group, and shelter type.
+            </p>
+            <p style={{ fontSize: "0.9rem", lineHeight: 1.5, opacity: 0.9 }}>
+              The data are based on HUD’s PIT counts, which measure the number of sheltered and unsheltered
+              people experiencing homelessness on a single night in late January. This dashboard uses 2007–2024
+              PIT counts aggregated at the CoC level, displayed using HUD CoC boundary datasets.
+            </p>
+            <p style={{ fontSize: "0.9rem", lineHeight: 1.5, opacity: 0.9 }}>
+              PIT data are reported by CoCs to HUD and undergo limited quality review. Counts may vary across
+              locations and years due to differences or changes in local counting methods and should be interpreted
+              as a snapshot in time, not an annual total.
+            </p>
+            <div style={{ textAlign: "left", marginTop: "0.75rem"}}>
+              <div
+                style={{
+                  marginTop: "0.75rem",
+                  marginBottom: "0.75rem",
+                  fontSize: "0.85rem",
+                  opacity: 0.85
+                }}
+              >
+                <div>
+                  Website:{" "}
+                  <a
+                    href="https://www.nevinm.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#cbb98b", textDecoration: "none" }}
+                  >
+                    nevinm.com
+                  </a>
+                </div>
 
+                <div style={{ marginTop: "4px" }}>
+                  LinkedIn:{" "}
+                  <a
+                    href="https://www.linkedin.com/in/nevinmcintyregis"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#cbb98b", textDecoration: "none" }}
+                  >
+                    linkedin.com/in/nevinmcintyregis
+                  </a>
+                </div>
+              </div>
 
-          <YearFilter
-            value={selectedYear}
-            onChange={setSelectedYear}
-          />
-
-
-          {/* STATE FILTER */}
-          <StateFilter
-            value={selectedState}
-            onChange={(state) => handleStateChange(state)}
-          />
-
-          {/* CURRENT COCNUMS */}
-          <CocnumFilter
-            type="current"
-            value={selectedCurrentCocnums}
-            onChange={setSelectedCurrentCocnums}
-            cocnums={filteredCurrentList}
-          />
-
-          <CocnumFilter
-            type="legacy"
-            label="Legacy COCNUM"
-            value={selectedLegacyCocnums}
-            onChange={setSelectedLegacyCocnums}
-            cocnums={filteredLegacyList}
-            labelMap={legacyLabelMap}
-            includeNoneOption={true}
-          />
-
-
-
-
+              <button className="dropdown" onClick={() => setShowInfo(false)}>
+                Close
+              </button>
+            </div>
+          </div>
         </div>
-      }
-      left={renderDashboard()}
-      map={<MapViewComponent
-        selectedState={selectedState}
-        selectedCurrent={selectedCurrentCocnums}
-        selectedLegacy={selectedLegacyCocnums}
-      />
-      }
-    />
+      )}
+    </>
   );
+
 }

@@ -45,3 +45,20 @@
   border: 1px solid #666;
   border-radius: 4px;
 }
+#info-button {
+  background: transparent;
+  color: #cbb98b;
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#info-button:hover {
+  background: #3a3a3a;
+  border-color: #777;
+}
