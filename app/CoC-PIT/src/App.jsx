@@ -13,12 +13,22 @@ import ShelteredSHDashboard from "./components/dashboards/ShelteredSHDashboard";
 import ShelteredTHDashboard from "./components/dashboards/ShelteredTHDashboard";
 import ShelteredTotalDashboard from "./components/dashboards/ShelteredTotalDashboard";
 import UnshelteredDashboard from "./components/dashboards/UnshelteredDashboard";
+import MobileLayout from "./components/MobileLayout";
 
 
 export default function App() {
   // ---- FILTER STATES ----
   const [selectedState, setSelectedState] = useState("");
   const [showInfo, setShowInfo] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   const cocList = [
     "AK-500", "AK-501",
     "AL-500", "AL-501", "AL-502", "AL-503", "AL-504", "AL-505", "AL-506", "AL-507", "AL-508",
@@ -497,70 +507,81 @@ export default function App() {
     setSelectedLegacyCocnums(["NONE"]);
   };
 
+  const filterBar = (
+    <div style={{ display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap" }}>
+      {!isMobile && (
+        <button
+          onClick={handleReset}
+          className="dropdown"
+        >
+          Reset Filters
+        </button>
+      )}
+
+      <HomelessGroupFilter
+        value={selectedGroup}
+        onChange={setSelectedGroup}
+      />
+
+      <YearFilter
+        value={selectedYear}
+        onChange={setSelectedYear}
+      />
+
+      <StateFilter
+        value={selectedState}
+        onChange={handleStateChange}
+      />
+
+      <CocnumFilter
+        type="current"
+        value={selectedCurrentCocnums}
+        onChange={setSelectedCurrentCocnums}
+        cocnums={filteredCurrentList}
+      />
+
+      <CocnumFilter
+        type="legacy"
+        label="Legacy COCNUM"
+        value={selectedLegacyCocnums}
+        onChange={setSelectedLegacyCocnums}
+        cocnums={filteredLegacyList}
+        labelMap={legacyLabelMap}
+        includeNoneOption
+      />
+    </div>
+  );
+
+
+  const mapView = (
+    <MapViewComponent
+      selectedState={selectedState}
+      selectedCurrent={selectedCurrentCocnums}
+      selectedLegacy={selectedLegacyCocnums}
+    />
+  );
+
+  const dashboardView = renderDashboard();
+
 
   return (
     <>
-      <Layout
-        top={
-          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-            {/* RESET BUTTON */}
-            <button
-              onClick={handleReset}
-              style={{
-                padding: "6px 10px",
-                background: "#444",
-                color: "white",
-                border: "1px solid #666",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
-              Reset Filters
-            </button>
-
-            <HomelessGroupFilter
-              value={selectedGroup}
-              onChange={setSelectedGroup}
-            />
-
-            <YearFilter
-              value={selectedYear}
-              onChange={setSelectedYear}
-            />
-
-            <StateFilter
-              value={selectedState}
-              onChange={(state) => handleStateChange(state)}
-            />
-
-            <CocnumFilter
-              type="current"
-              value={selectedCurrentCocnums}
-              onChange={setSelectedCurrentCocnums}
-              cocnums={filteredCurrentList}
-            />
-
-            <CocnumFilter
-              type="legacy"
-              label="Legacy COCNUM"
-              value={selectedLegacyCocnums}
-              onChange={setSelectedLegacyCocnums}
-              cocnums={filteredLegacyList}
-              labelMap={legacyLabelMap}
-              includeNoneOption={true}
-            />
-          </div>
-        }
-        left={renderDashboard()}
-        map={
-          <MapViewComponent
-            selectedState={selectedState}
-            selectedCurrent={selectedCurrentCocnums}
-            selectedLegacy={selectedLegacyCocnums}
-          />
-        }
-        onInfoClick={() => setShowInfo(true)}
-      />
+      {isMobile ? (
+        <MobileLayout
+          top={filterBar}
+          map={mapView}
+          left={dashboardView}
+          onInfoClick={() => setShowInfo(true)}
+          onResetFilters={handleReset}
+        />
+      ) : (
+        <Layout
+          top={filterBar}
+          map={mapView}
+          left={dashboardView}
+          onInfoClick={() => setShowInfo(true)}
+        />
+      )}
 
       {/* 👇 INFO MODAL GOES HERE 👇 */}
       {showInfo && (
@@ -606,7 +627,7 @@ export default function App() {
               locations and years due to differences or changes in local counting methods and should be interpreted
               as a snapshot in time, not an annual total.
             </p>
-            <div style={{ textAlign: "left", marginTop: "0.75rem"}}>
+            <div style={{ textAlign: "left", marginTop: "0.75rem" }}>
               <div
                 style={{
                   marginTop: "0.75rem",
