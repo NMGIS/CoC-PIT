@@ -459,7 +459,7 @@ export default function ShelteredTHDashboard({
       if (populationGroup === "all") {
         await buildDistribution(TH_ETHNICITY_FIELDS, total, setEthnicityData, table);
         await buildDistribution(TH_GENDER_OVERALL, total, setGenderData, table);
-        await buildDistribution(TH_GENDER_OVERALL, total, setAgeData, table);
+        await buildDistribution(TH_AGE_OVERALL, total, setAgeData, table);
         await buildDistribution(TH_RACE_OVERALL, total, setRaceData, table);
         await buildDistribution(
           TH_HISPANIC_FIELDS,

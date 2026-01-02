@@ -423,8 +423,16 @@ export default function App() {
           />
         );
 
+
       case "Unsheltered Homeless":
-        return <UnshelteredDashboard year={selectedYear} tables={groupToTables[selectedGroup]} />;
+        return (
+          <UnshelteredDashboard
+            year={selectedYear}
+            state={selectedState}
+            currentCocnums={selectedCurrentCocnums}
+            legacyCocnums={selectedLegacyCocnums}
+          />
+        );
     }
   }
 
