@@ -24,11 +24,12 @@ export default function MobileLayout({
         }}
       >
         <button
-          onClick={() => setFiltersOpen(true)}
+          onClick={() => setFiltersOpen(prev => !prev)}
           className="dropdown"
         >
           Filters
         </button>
+
 
         <button
           onClick={onResetFilters}
