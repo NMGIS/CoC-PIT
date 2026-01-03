@@ -77,7 +77,7 @@ export default function MobileLayout({
       </div>
 
       {/* DATA PANEL */}
-      <div style={{ flex: 1, overflowY: "auto" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "1rem"}}>
         {left}
       </div>
     </div>

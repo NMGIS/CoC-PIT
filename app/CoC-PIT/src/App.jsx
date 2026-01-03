@@ -558,6 +558,7 @@ export default function App() {
       selectedState={selectedState}
       selectedCurrent={selectedCurrentCocnums}
       selectedLegacy={selectedLegacyCocnums}
+      isMobile={isMobile}
     />
   );
 

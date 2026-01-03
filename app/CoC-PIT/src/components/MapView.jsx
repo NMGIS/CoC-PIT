@@ -6,7 +6,8 @@ import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import { supabase } from "../supabaseClient";
 
 
-export default function MapViewComponent({ selectedState, selectedCurrent = [], selectedLegacy = [] }) {
+export default function MapViewComponent({ selectedState, selectedCurrent = [], selectedLegacy = [],
+  isMobile = false }) {
   const mapDiv = useRef(null);
   const layerRef = useRef(null);
   const viewRef = useRef(null);
@@ -14,24 +15,24 @@ export default function MapViewComponent({ selectedState, selectedCurrent = [], 
   const [isLoading, setIsLoading] = useState(true);
   const layerViewRef = useRef(null);
 
-function buildCurrentExpr(state, currentCocnums, legacyCocnums) {
-  // If legacy selected and no current selected → show NOTHING
-  if (
-    legacyCocnums.length > 0 &&
-    !legacyCocnums.includes("NONE") &&
-    currentCocnums.length === 0
-  ) {
-    return "1=0";
-  }
+  function buildCurrentExpr(state, currentCocnums, legacyCocnums) {
+    // If legacy selected and no current selected → show NOTHING
+    if (
+      legacyCocnums.length > 0 &&
+      !legacyCocnums.includes("NONE") &&
+      currentCocnums.length === 0
+    ) {
+      return "1=0";
+    }
 
-  let parts = [];
-  if (state) parts.push(`STATE_NAME = '${state}'`);
-  if (currentCocnums.length > 0) {
-    parts.push(`COCNUM IN (${currentCocnums.map(c => `'${c}'`).join(",")})`);
-  }
+    let parts = [];
+    if (state) parts.push(`STATE_NAME = '${state}'`);
+    if (currentCocnums.length > 0) {
+      parts.push(`COCNUM IN (${currentCocnums.map(c => `'${c}'`).join(",")})`);
+    }
 
-  return parts.length ? parts.join(" AND ") : null;
-}
+    return parts.length ? parts.join(" AND ") : null;
+  }
 
 
   function buildLegacyExpr(state, cocnums) {
@@ -130,7 +131,7 @@ function buildCurrentExpr(state, currentCocnums, legacyCocnums) {
       container: mapDiv.current,
       map,
       center: [-98, 39],
-      zoom: 4
+      zoom: isMobile ? 2 : 3.6
     });
 
     viewRef.current = view;
@@ -195,7 +196,10 @@ function buildCurrentExpr(state, currentCocnums, legacyCocnums) {
     const expr = zoomLayer.definitionExpression;
 
     if (!expr) {
-      view.goTo({ center: [-98, 39], zoom: 4 });
+      view.goTo({
+        center: [-98, 39],
+        zoom: isMobile ? 2 : 4
+      });
       return;
     }
 
