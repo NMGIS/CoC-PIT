@@ -46,40 +46,49 @@ export default function MobileLayout({
         </button>
       </div>
 
-      {/* FILTER DRAWER */}
-      {filtersOpen && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "#1f1f1f",
-            zIndex: 1000,
-            padding: "1rem",
-            overflowY: "auto"
-          }}
-        >
-          <div style={{ marginBottom: "1rem" }}>
-            <button
-              onClick={() => setFiltersOpen(false)}
-              className="dropdown"
-            >
-              Close
-            </button>
-          </div>
-
-          {top}
-        </div>
-      )}
-
       {/* MAP */}
       <div style={{ flex: "0 0 55%" }}>
         {map}
       </div>
 
-      {/* DATA PANEL */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "1rem"}}>
-        {left}
+      {/* DATA / FILTER PANEL */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "0.75rem",
+          background: "#1f1f1f",
+          borderTop: "1px solid #333"
+        }}
+      >
+        {filtersOpen ? (
+          <>
+            {/* FILTER PANEL HEADER */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "0.75rem"
+              }}
+            >
+              <strong>Filters</strong>
+              <button
+                onClick={() => setFiltersOpen(false)}
+                className="dropdown"
+              >
+                Close
+              </button>
+            </div>
+
+            {/* FILTER CONTENT */}
+            {top}
+          </>
+        ) : (
+          left
+        )}
       </div>
+
     </div>
   );
 }
