@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import MapViewComponent from "./components/MapView";
 import Layout from "./components/Layout";
 import StateFilter from "./components/StateFilter";
-import CocnumFilter from "./components/COCNUMFilter";
+import CocnumFilter from "./components/CocnumFilter";
 import YearFilter from "./components/YearFilter";
 import HomelessGroupFilter from "./components/HomelessGroupFilter";
 import "./App.css";
