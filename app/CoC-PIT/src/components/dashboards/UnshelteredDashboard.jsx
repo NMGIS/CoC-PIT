@@ -25,7 +25,7 @@ const populationConfig = {
     totalField: "a0884"
   },
   unaccompanied_youth: {
-    table: "sunsheltered_homeless_unaccompanied_youth_under_25",
+    table: "unsheltered_homeless_unaccompanied_youth_under_25",
     totalField: "a1082"
   },
   parenting_youth: {
