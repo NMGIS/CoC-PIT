@@ -519,11 +519,12 @@ export default function App() {
         </button>
       )}
 
-      <HomelessGroupFilter
-        value={selectedGroup}
-        onChange={setSelectedGroup}
-      />
-
+      {!isMobile && (
+        <HomelessGroupFilter
+          value={selectedGroup}
+          onChange={setSelectedGroup}
+        />
+      )}
       <YearFilter
         value={selectedYear}
         onChange={setSelectedYear}
@@ -563,7 +564,21 @@ export default function App() {
     />
   );
 
-  const dashboardView = renderDashboard();
+  const dashboardView = (
+    <>
+      {isMobile && (
+        <div style={{ marginBottom: "0.75rem" }}>
+          <HomelessGroupFilter
+            value={selectedGroup}
+            onChange={setSelectedGroup}
+          />
+        </div>
+      )}
+
+      {renderDashboard()}
+    </>
+  );
+
 
 
   return (
