@@ -78,7 +78,7 @@ export default function MapViewComponent({ selectedState, selectedCurrent = [], 
       labelingInfo: [
         {
           labelExpressionInfo: { expression: "$feature.COCNUM" },
-          minScale: 4636162,
+          minScale: 9242330,
           symbol: {
             type: "text",
             color: "black",
