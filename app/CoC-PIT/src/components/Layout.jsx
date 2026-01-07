@@ -6,7 +6,7 @@ export default function Layout({ top, left, map, onInfoClick }) {
         gridTemplateColumns: "1fr 1fr",  // left | map
         gridTemplateRows: "auto 1fr",
         height: "100vh",
-        width: "100vw",
+        width: "100%",
         overflow: "hidden",
       }}
     >
