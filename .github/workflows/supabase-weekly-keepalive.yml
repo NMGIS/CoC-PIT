@@ -1,24 +1,53 @@
-name: Supabase Weekly Keep Alive
+name: Supabase Keep Alive
 
 on:
   schedule:
-    # Runs every Sunday at 10:00 UTC
-    - cron: "0 10 * * 0"
+    - cron: "0 10 * * 0,3"  # Sunday and Wednesday
   workflow_dispatch:
 
 jobs:
   keepalive:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Query distinct years from overall_homeless
+      - name: Query random rows from homeless tables
         env:
           SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: |
-          echo "Pinging Supabase..."
-          curl --fail-with-body -X GET \
-          "$SUPABASE_URL/rest/v1/overall_homeless?select=year&order=year.asc" \
-          -H "apikey: $SUPABASE_ANON_KEY" \
-          -H "Authorization: Bearer $SUPABASE_ANON_KEY"
+          python3 - <<'EOF'
+          import urllib.request
+          import json
+          import random
+          import os
 
+          url = os.environ["SUPABASE_URL"]
+          key = os.environ["SUPABASE_ANON_KEY"]
+          headers = {
+              "apikey": key,
+              "Authorization": f"Bearer {key}"
+          }
+
+          def query_random_rows(table, max_offset=500):
+              offset = random.randint(0, max_offset)
+              endpoint = f"{url}/rest/v1/{table}?select=*&limit=5&offset={offset}"
+              req = urllib.request.Request(endpoint, headers=headers)
+              with urllib.request.urlopen(req) as response:
+                  data = json.loads(response.read())
+              if not data:
+                  # Offset exceeded table size, fall back to offset 0
+                  endpoint = f"{url}/rest/v1/{table}?select=*&limit=5&offset=0"
+                  req = urllib.request.Request(endpoint, headers=headers)
+                  with urllib.request.urlopen(req) as response:
+                      data = json.loads(response.read())
+              for row in data:
+                  col = random.choice(list(row.keys()))
+                  print(f"  [{table}] {col} = {row[col]}")
+
+          print("overall_homeless:")
+          query_random_rows("overall_homeless")
+
+          print("sheltered_th_homeless:")
+          query_random_rows("sheltered_th_homeless")
+
+          print("Done.")
+          EOF
